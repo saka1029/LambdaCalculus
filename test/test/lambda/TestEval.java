@@ -32,6 +32,23 @@ public class TestEval {
     }
     
     @Test
+    public void testChurchNumerals2() {
+        Context c = Context.root()
+            .define("succ", "n.f.x.f(n f x)")
+            .define("plus", "m.n.f.x.m f(n f x)")
+            .define("n0", "a.b.b")
+            .define("n1", "a.b.a b")
+            .define("n2", "a.b.a(a b)")
+            .define("n3", "a.b.a(a(a b))")
+            ;
+        assertEquals(Expression.of("n1").eval(c), Expression.of("succ n0").eval(c));
+        assertEquals(Expression.of("n2").eval(c), Expression.of("succ n1").eval(c));
+        assertEquals(Expression.of("n3").eval(c), Expression.of("succ n2").eval(c));
+        assertEquals(Expression.of("n2").eval(c), Expression.of("succ (succ n0)").eval(c));
+        assertEquals(Expression.of("n3").eval(c), Expression.of("plus n1 n2").eval(c));
+    }
+    
+    @Test
     public void testLogic() {
         Context c = Context.root()
             .put("true", "x.y.x")

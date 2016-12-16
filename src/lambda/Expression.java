@@ -3,7 +3,7 @@ package lambda;
 public abstract class Expression {
 
     public Expression eval(Context context) {
-        context.enter(this);
+        context.enter(this, context);
         Expression e = evalCore(context);
         context.leave(e);
         return e;

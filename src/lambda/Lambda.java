@@ -1,6 +1,6 @@
 package lambda;
 
-public class Lambda extends Expression implements Applicable {
+public class Lambda extends Applicable {
     
     final Variable variable;
     final Expression body;
