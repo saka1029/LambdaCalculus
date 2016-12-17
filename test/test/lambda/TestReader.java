@@ -7,11 +7,12 @@ import org.junit.Test;
 
 import static lambda.Expression.*;
 
-public class TestRead {
+public class TestReader {
     
     @Test
     public void testRead() {
         assertEquals(variable("a"), of("a"));
+        assertEquals(variable("a"), of("a  "));
         assertEquals(variable("abc"), of("(abc)"));
         assertEquals(variable("a").apply(variable("b")), of("a  b"));
         assertEquals(variable("a").lambda(variable("a")), of("a.a"));

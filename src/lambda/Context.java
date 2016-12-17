@@ -8,12 +8,13 @@ public class Context {
     final Map<Variable, Expression> map = new HashMap<>();
     int level = 0;
     int sequence = 0;
+    boolean trace = false;
     
     public Expression get(Variable variable) {
         return map.get(variable);
     }
     
-    public Expression getOr(Variable variable, Expression or) {
+    public Expression getOrDefault(Variable variable, Expression or) {
         Expression r = map.get(variable);
         if (r != null)
             return r;
@@ -66,11 +67,13 @@ public class Context {
     }
 
     public void enter(Expression e, Context c) {
+        if (!trace) return;
         System.out.println(indent() + "> " + e + " : " + c);
         ++level;
     }
 
     public void leave(Expression e) {
+        if (!trace) return;
         --level;
         System.out.println(indent() + "< " + e);
     }

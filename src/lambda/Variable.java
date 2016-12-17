@@ -32,12 +32,12 @@ public class Variable implements Expression {
 
     @Override
     public Expression evalCore(Context context) {
-        return context.getOr(this, this);
+        return context.getOrDefault(this, this);
     }
     
     @Override
     public Expression normalize(Context context) {
-        return context.getOr(this, this);
+        return context.getOrDefault(this, this);
     }
 
     @Override
