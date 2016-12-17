@@ -1,19 +1,19 @@
 package lambda;
 
-public class Application implements Expression {
+public class Application implements Term {
     
-    final Expression head;
-    final Expression tail;
+    final Term head;
+    final Term tail;
     
-    public Application(Expression head, Expression tail) {
+    public Application(Term head, Term tail) {
         this.head = head;
         this.tail = tail;
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof Expression))
+        if (!(obj instanceof Term))
             return false;
-        Expression o = (Expression)obj;
+        Term o = (Term)obj;
         return o.normalize().eq(normalize());
     }
 
@@ -26,9 +26,9 @@ public class Application implements Expression {
     }
     
     @Override
-    public Expression evalCore(Context context) {
-        Expression function = head.eval(context);
-        Expression argument = tail.eval(context);
+    public Term evalCore(Context context) {
+        Term function = head.eval(context);
+        Term argument = tail.eval(context);
         if (function instanceof Applicable)
             return ((Applicable)function).apply(argument, context);
         else
@@ -36,7 +36,7 @@ public class Application implements Expression {
     }
     
     @Override
-    public Expression normalize(Context context) {
+    public Term normalize(Context context) {
         return new Application(head.normalize(context), tail.normalize(context));
     }
    

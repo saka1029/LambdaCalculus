@@ -5,33 +5,30 @@ import java.util.Map;
 
 public class Context {
     
-    final Map<Variable, Expression> map = new HashMap<>();
+    final Map<Variable, Term> map = new HashMap<>();
     int level = 0;
     int sequence = 0;
     boolean trace = false;
     
-    public Expression get(Variable variable) {
+    public Term get(Variable variable) {
         return map.get(variable);
     }
     
-    public Expression getOrDefault(Variable variable, Expression or) {
-        Expression r = map.get(variable);
-        if (r != null)
-            return r;
-        else
-            return or;
+    public Term get(Variable variable, Term defaultValue) {
+        Term r = map.get(variable);
+        return r != null ? r : defaultValue;
     }
 
-    public Expression define(Variable v, Expression e) {
+    public Term define(Variable v, Term e) {
         map.put(v, e);
         return e;
     }
     
-    public Expression define(String variable, String expression) {
-        return define(Variable.of(variable), Expression.of(expression));
+    public Term define(String variable, String expression) {
+        return define(Variable.of(variable), Term.of(expression));
     }
     
-    public Expression define(String name, Native n) {
+    public Term define(String name, Native n) {
         return define(Variable.of(name), Native.of(name, n));
     }
     
@@ -39,8 +36,8 @@ public class Context {
         return Variable.of(sequence);
     }
 
-    Restorable put(Variable variable, Expression expression) {
-        Expression old = map.put(variable, expression);
+    Restorable put(Variable variable, Term expression) {
+        Term old = map.put(variable, expression);
         if (old != null)
             return () -> map.put(variable, old);
         else
@@ -49,7 +46,7 @@ public class Context {
     
 
     Restorable put(Variable variable) {
-        Expression old = map.put(variable, Variable.of(sequence++));
+        Term old = map.put(variable, Variable.of(sequence++));
         if (old != null)
             return () -> { map.put(variable, old); --sequence; };
         else
@@ -66,13 +63,13 @@ public class Context {
         return level == 0 ? "" : String.format("%" + level + "s", "");
     }
 
-    public void enter(Expression e, Context c) {
+    public void enter(Term e, Context c) {
         if (!trace) return;
         System.out.println(indent() + "> " + e + " : " + c);
         ++level;
     }
 
-    public void leave(Expression e) {
+    public void leave(Term e) {
         if (!trace) return;
         --level;
         System.out.println(indent() + "< " + e);

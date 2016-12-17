@@ -4,14 +4,14 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import lambda.Expression;
+import lambda.Term;
 
-import static lambda.Expression.*;
+import static lambda.Term.*;
 
 public class TestNormalize {
     
     static void normalize(String s) {
-        Expression e = of(s);
+        Term e = of(s);
         System.out.println(e + " -> " + e.normalize());
     }
 

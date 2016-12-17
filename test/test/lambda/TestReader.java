@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import static lambda.Expression.*;
+import static lambda.Term.*;
 
 public class TestReader {
     

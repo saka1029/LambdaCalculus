@@ -1,63 +1,86 @@
-# ラムダ計算
+# Lambda calculus in Java
 
-## 文法
+This is an implementation of [lambda calculus](https://en.wikipedia.org/wiki/Lambda_calculus) processor in Java.
 
-```
-Expression = Factor
-           | Expression Factor
-
-Factor     = Variable
-           | Lambda
-           | '(' Expression ')'
-
-Lambda     = Variable '.' Expression
-```
-
-### 変数
-
-
-### ラムダ式
-
-通常のラムダ式は「λ変数の並び.本体」と表記しますが、
-本プログラムにおけるラムダ式は「変数.本体」の形式で記述します。
+## Syntax
 
 ```
-λx.x   →   x.x
+Term   = Factor
+       | Term Factor
+
+Factor = Variable
+       | Lambda
+       | '(' Term ')'
+
+Lambda = Variable '.' Term
 ```
 
+### Variable
 
-変数はひとつしか書けないので変数が複数ある場合はカリー化して表記する必要があります。
-通常のラムダ式「λxy.x」はカリー化すると「λx.λy.x」となり、
-本プログラムではここから「λ」を除去したもの、つまり「x.y.x」という表現になります。
+A variable is an identifier consisting of one or more alphanumeric characters.
+You can also use characters `+`,  `-`,  `*`,  `/`, `|`,  `&`,  `!`, `^` and  `%` as a part of variable.
+
+### Lambda
+
+Normally, the lambda expression is expressed as `λ variables . body`,
+but in this program it is expressed as `variable . body`.
+Since only one variable is permitted,
+if there are two or more variables, it must be with currying.
+So you must express the lambda term `λxy.x` as `x.y.x`.
+The dot operator (`.`) is right associative.
+So the lambda term `x.y.x` is equivalent to `x.(y.x)`.
+
+
+### Application
+
+An application `t s` represents the application of a function `t` to an input `s`,
+that is, it represents the act of calling function `t` on input `s` to produce `t(s)`.
+The application operator (` `) is left associative.
+So the lambda term `x y z` is equivalent to `(x y) z`.
+
+## Command line
+
+You can start REPL (Read Evaluation Print Loop) like this.
+
+<pre><code>C:\projects\LambdaCalculus> <b>java -cp bin lambda.Term</b>
+% <b>(x.x C) V</b>
+V C
+% <b>exit</b>
+
+C:\projects\LambdaCalculus></code></pre>
+
+`% ` is the prompt.
+You can type a lambda term (for example `(x.x C) V`).
+And the program prints the result of evaluation (for example `V C`).
+
+### Special commands
+
+* **exit** -- Terminate REPL.
+* **quit** -- Terminate REPL.
+
+### Built-in variables
+
+* **true** -- The true value as lambda term.  That is `x.y.x`
+* **false** -- The false value as lambda term.  That is `x.y.y`
+
+### Built-in functions.
+
+* **define V E** -- Define the variable V holds the value E.
+* **trace B** -- `trace true` starts trace mode.  and `trace false` ends trace mode.
+* **and B C** -- Returns a boolean value B and C.  That is `p.q.p q p`.
+* **or B C** -- Returns a boolean value B or C.  That is `p.q.p p q`.
+* **not B** -- Returns a boolean value not B.  That is `p.p true false`.
+
+
+## Church numerals
+
+Church numerals represents natural numbers in lambda term like this.
 
 ```
-λxy.x   →   λx.λy.x   →   x.y.x
-```
-
-ラムダ式を構成する「.」演算子は右結合なので「x.y.x」は「x.(y.x)」と同値です。
-
-```
-x.y.x   ⇔   x.(y.x)
-```
-
-### 関数適用
-
-関数適用は左結合なので「x y z」は「(x y) z」と同値です。
-
-### equals
-
-正規化して評価する。
-
-
-## チャーチ数
-
-チャーチ数は自然数をラムダ式で表現したもので、0, 1, 2, 3 を以下のように表現します。
-
-```
-n0   = a.b.b
-n1   = a.b.a b
-n2   = a.b.a(a b)
-n3   = a.b.a(a(a b))
+0   = a.b.b
+1   = a.b.a b
+2   = a.b.a(a b)
+3   = a.b.a(a(a b))
 ```
 
 `n`を受け取って`n + 1`を返す関数`succ`は以下のように表現します。

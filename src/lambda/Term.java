@@ -4,36 +4,36 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public interface Expression {
+public interface Term {
 
-    static Expression of(String s) { return new Reader(s).read(); }
+    static Term of(String s) { return new Reader(s).read(); }
     static Variable variable(String s) { return Variable.of(s); }
 
-    default Expression eval(Context context) {
+    default Term eval(Context context) {
         context.enter(this, context);
-        Expression e = evalCore(context);
+        Term e = evalCore(context);
         context.leave(e);
         return e;
     }
 
-    default Application apply(Expression... args) {
+    default Application apply(Term... args) {
         if (args.length == 0)
             throw new IllegalArgumentException("no args");
-        Expression e = this;
-        for (Expression a : args)
+        Term e = this;
+        for (Term a : args)
             e = new Application(e, a);
         return (Application)e;
     }
 
-    default Expression normalize() { return normalize(new Context()); }
+    default Term normalize() { return normalize(new Context()); }
 
-    static Expression defineNative(Context c, String name, Native n) {
+    static Term defineNative(Context c, String name, Native n) {
         return c.define(Variable.of(name), Native.of(name, n));
     }
 
     static Context defaultContext() {
-        Expression TRUE = of("x.y.x");
-        Expression FALSE = of("x.y.y");
+        Term TRUE = of("x.y.x");
+        Term FALSE = of("x.y.y");
         Context c = new Context();
         c.define("define", (arg0, ctx0) -> (Native) (arg1, ctx1) ->
             ctx1.define((Variable)arg0, arg1.eval(ctx1)));
@@ -52,11 +52,11 @@ public interface Expression {
         return c;
     }
 
-    default Expression eval() { return eval(defaultContext()); }
+    default Term eval() { return eval(defaultContext()); }
     boolean eq(Object obj);
 
-    Expression evalCore(Context context);
-    Expression normalize(Context context);
+    Term evalCore(Context context);
+    Term normalize(Context context);
     
     static void main(String[] args) throws IOException {
         Context context = defaultContext();
@@ -68,7 +68,7 @@ public interface Expression {
                 if (line.length() <= 0) break;
                 if (line.equalsIgnoreCase("exit") || line.equalsIgnoreCase("quit")) break;
                 try {
-                    Expression evaled = of(line).eval(context);
+                    Term evaled = of(line).eval(context);
                     System.out.println(evaled);
                 } catch (Exception e) {
                     System.out.println(e);

@@ -1,7 +1,7 @@
 package lambda;
 
-public interface Applicable extends Expression {
+public interface Applicable extends Term {
 
-    Expression apply(Expression argument, Context context);
+    Term apply(Term argument, Context context);
 
 }

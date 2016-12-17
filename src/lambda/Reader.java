@@ -47,9 +47,9 @@ class Reader {
         this.s = s;
     }
 
-    Expression readParen() {
+    Term readParen() {
         get();
-        Expression e = readExpression();
+        Term e = readExpression();
         skipSpaces();
         if (ch != ')')
             throw new RuntimeException("')' expected");
@@ -68,18 +68,18 @@ class Reader {
         return Variable.of(sb.toString());
     }
 
-    Expression readLambda() {
+    Term readLambda() {
         Variable v = readVariable();
         skipSpaces();
         if (ch == '.') {
             get();
-            Expression e = readExpression();
+            Term e = readExpression();
             return new Lambda(v, e);
         }
         return v;
     }
 
-    Expression readFactor() {
+    Term readFactor() {
         skipSpaces();
         if (ch == '(')
             return readParen();
@@ -89,8 +89,8 @@ class Reader {
             throw new RuntimeException("Unknown char: " + (char) ch);
     }
 
-    Expression readExpression() {
-        Expression e = readFactor();
+    Term readExpression() {
+        Term e = readFactor();
         skipSpaces();
         while (ch == '(' || isVariableStart(ch)) {
             e = new Application(e, readFactor());
@@ -99,8 +99,8 @@ class Reader {
         return e;
     }
 
-    Expression read() {
-        Expression e = readExpression();
+    Term read() {
+        Term e = readExpression();
         if (ch != EOF)
             throw new RuntimeException("Unread string: " + s.substring(index));
         return e;
