@@ -1,6 +1,6 @@
 package lambda;
 
-public class Lambda extends Applicable {
+public class Lambda implements Applicable {
     
     final Variable variable;
     final Expression body;
@@ -8,6 +8,13 @@ public class Lambda extends Applicable {
     public Lambda(Variable variable, Expression body) {
         this.variable = variable;
         this.body = body;
+    }
+
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Expression))
+            return false;
+        Expression o = (Expression)obj;
+        return o.normalize().eq(normalize());
     }
     
     @Override
@@ -19,23 +26,27 @@ public class Lambda extends Applicable {
     }
 
     @Override
-    Expression evalCore(Context context) {
-        Context n = context.put(variable, variable);
-        Expression e = body.eval(n);
-        return new Lambda(variable, e);
+    public Expression evalCore(Context context) {
+        try (Restorable r = context.put(variable, variable)) {
+            Expression e = body.eval(context);
+            return new Lambda(variable, e);
+        }
     }
     
     @Override
     public Expression apply(Expression argument, Context context) {
-        Context n = context.put(variable, argument);
-        return body.eval(n);
+        try (Restorable r = context.put(variable, argument)) {
+            return body.eval(context);
+        }
     }
     
     @Override
-    public Expression normalize(NormalizeContext context) {
-        NormalizeContext n = context.put(variable);
-        Expression e = body.normalize(n);
-        return new Lambda(n.normalized, e);
+    public Expression normalize(Context context) {
+        Variable s = context.normalizedVariable();
+        try (Restorable r = context.put(variable)) {
+            Expression e = body.normalize(context);
+            return new Lambda(s, e);
+        }
     }
     
     @Override

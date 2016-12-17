@@ -3,7 +3,7 @@ package lambda;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Variable extends Expression {
+public class Variable implements Expression {
     
     static final Map<String, Variable> map = new HashMap<>();
     
@@ -31,15 +31,13 @@ public class Variable extends Expression {
     }
 
     @Override
-    Expression evalCore(Context context) {
-        Expression e = context.get(this);
-        if (e != null) return e;
-        return this;
+    public Expression evalCore(Context context) {
+        return context.getOr(this, this);
     }
     
     @Override
-    Expression normalize(NormalizeContext context) {
-        return context.get(this);
+    public Expression normalize(Context context) {
+        return context.getOr(this, this);
     }
 
     @Override

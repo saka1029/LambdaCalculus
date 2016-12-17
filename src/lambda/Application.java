@@ -1,6 +1,6 @@
 package lambda;
 
-public class Application extends Expression {
+public class Application implements Expression {
     
     final Expression head;
     final Expression tail;
@@ -8,6 +8,13 @@ public class Application extends Expression {
     public Application(Expression head, Expression tail) {
         this.head = head;
         this.tail = tail;
+    }
+
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Expression))
+            return false;
+        Expression o = (Expression)obj;
+        return o.normalize().eq(normalize());
     }
 
     @Override
@@ -29,7 +36,7 @@ public class Application extends Expression {
     }
     
     @Override
-    public Expression normalize(NormalizeContext context) {
+    public Expression normalize(Context context) {
         return new Application(head.normalize(context), tail.normalize(context));
     }
    

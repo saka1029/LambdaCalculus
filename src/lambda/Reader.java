@@ -16,6 +16,21 @@ class Reader {
     final String s;
     int index = 0;
     int ch = ' ';
+    
+    static boolean isVariableStart(int ch) {
+        switch (ch) {
+        case '+': case '-': case '*': case '/':
+        case '|': case '&': case '!':
+        case '^': case '%':
+            return true;
+        default:
+            return Character.isJavaIdentifierPart(ch);
+        }
+    }
+    
+    static boolean isVariablePart(int ch) {
+        return isVariableStart(ch);
+    }
 
     int get() {
         if (index >= s.length())
@@ -46,7 +61,7 @@ class Reader {
         StringBuilder sb = new StringBuilder();
         sb.append((char) ch);
         get();
-        while (Character.isJavaIdentifierPart(ch)) {
+        while (isVariablePart(ch)) {
             sb.append((char) ch);
             get();
         }
@@ -68,7 +83,7 @@ class Reader {
         skipSpaces();
         if (ch == '(')
             return readParen();
-        else if (Character.isJavaIdentifierStart(ch))
+        else if (isVariableStart(ch))
             return readLambda();
         else
             throw new RuntimeException("Unknown char: " + (char) ch);
@@ -77,7 +92,7 @@ class Reader {
     Expression readExpression() {
         Expression e = readFactor();
         skipSpaces();
-        while (ch == '(' || Character.isJavaIdentifierStart(ch)) {
+        while (ch == '(' || isVariableStart(ch)) {
             e = new Application(e, readFactor());
             skipSpaces();
         }

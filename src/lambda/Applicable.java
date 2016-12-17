@@ -1,7 +1,7 @@
 package lambda;
 
-public abstract class Applicable extends Expression {
+public interface Applicable extends Expression {
 
-    abstract Expression apply(Expression argument, Context context);
+    Expression apply(Expression argument, Context context);
 
 }
