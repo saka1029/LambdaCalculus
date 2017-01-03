@@ -13,12 +13,14 @@ Factor = Variable
        | '(' Term ')'
 
 Lambda = Variable '.' Term
+       | 'λ' Variable { Variable } '.' Term
+       | '\' Variable { Variable } '.' Term
 ```
 
 ### Variable
 
 A variable is an identifier consisting of one or more alphanumeric characters.
-You can also use characters `+`,  `-`,  `*`,  `/`, `|`,  `&`,  `!`, `^` and  `%` as a part of variable.
+You can also use characters `+`,  `-`,  `*`,  `/`, `|`,  `!`, `^` and  `%` as a part of variable.
 
 ### Lambda
 

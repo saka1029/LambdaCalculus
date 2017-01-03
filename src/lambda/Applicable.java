@@ -1,6 +1,6 @@
 package lambda;
 
-public interface Applicable extends Term {
+public interface Applicable {
 
     Term apply(Term argument, Context context);
 

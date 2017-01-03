@@ -1,0 +1,14 @@
+define 0 a.b.b
+define 1 a.b.a b
+define 2 a.b.a (a b)
+define 3 a.b.a (a (a b))
+define SUCC (n.f.x.f (n f x))
+define PLUS (m.n.f.x.m f (n f x))
+define MULT (m.n.f.m (n f))
+define MULT2 (p.q.p (PLUS q) 0)
+SUCC 0
+SUCC (SUCC 1)
+PLUS 2 3
+MULT 2 3
+MULT2
+MULT2 2 3

@@ -1,58 +1,92 @@
 package lambda;
 
-public class Lambda implements Applicable {
+public class Lambda implements Term, Applicable {
+
+    final String name;
+    Term body;
     
-    final Variable variable;
-    final Term body;
-  
-    public Lambda(Variable variable, Term body) {
-        this.variable = variable;
-        this.body = body;
+    Lambda(String name) {
+        if (name == null) throw new IllegalArgumentException("name is null");
+        this.name = name;
     }
 
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Term))
-            return false;
-        Term o = (Term)obj;
-        return o.normalize().eq(normalize());
-    }
-    
-    @Override
-    public boolean eq(Object obj) {
-        if (!(obj instanceof Lambda))
-            return false;
-        Lambda o = (Lambda)obj;
-        return o.variable.eq(variable) && o.body.eq(body);
+    private Term etaConversion() {
+        if (!(body instanceof Application)) return null;
+        Application app = (Application)body;
+        if (!(app.tail instanceof BoundVariable)) return null;
+        BoundVariable v = (BoundVariable)app.tail;
+        if (v.lambda != this) return null;
+        if (app.head.containsBoundVariable(this)) return null;
+        return app.head;
     }
 
     @Override
-    public Term evalCore(Context context) {
-        try (Restorable r = context.put(variable, variable)) {
-            Term e = body.eval(context);
-            return new Lambda(variable, e);
+    public Term reduce(Context context) {
+//        Term eta = etaConversion();
+//        if (eta != null) return eta.reduce(context);
+        Lambda lambda = new Lambda(name);
+        try (Restorable r = context.bound.put(this, new BoundVariable(lambda))) {
+            lambda.body = body.reduce(context);
         }
+        Term e = lambda.etaConversion();
+        if (e != null) return e.reduce(context);
+        return lambda;
     }
     
     @Override
     public Term apply(Term argument, Context context) {
-        try (Restorable r = context.put(variable, argument)) {
-            return body.eval(context);
+        try (Restorable r = context.bound.put(this, argument.reduce(context))) {
+            return body.reduce(context);
         }
     }
     
     @Override
-    public Term normalize(Context context) {
-        Variable s = context.normalizedVariable();
-        try (Restorable r = context.put(variable)) {
-            Term e = body.normalize(context);
-            return new Lambda(s, e);
+    public Term normalize(NormalizeContext context) {
+        String name = "$" + context.size();
+        Lambda lambda = new Lambda(name);
+        BoundVariable variable = new BoundVariable(lambda);
+        try (Restorable r = context.put(this, variable)) {
+            lambda.body = body.normalize(context);
+            return lambda;
         }
     }
     
     @Override
-    public String toString() {
+    public boolean containsBoundVariable(Lambda lambda) {
+        return body.containsBoundVariable(lambda);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Lambda))
+            return false;
+        Lambda o = (Lambda)obj;
+        return o.name.equals(name) && o.body.equals(body);
+    }
+
+    private void toStringBody(StringBuilder sb) {
+        sb.append(name);
+        if (body instanceof Lambda) {
+            sb.append(" ");
+            ((Lambda)body).toStringBody(sb);
+        } else
+            sb.append(".").append(body);
+    }
+
+    public String toStringLambda() {
         StringBuilder sb = new StringBuilder();
-        sb.append(variable).append(".").append(body);
+        sb.append("λ");
+        toStringBody(sb);
         return sb.toString();
     }
+    
+    public String toStringDot() {
+        return name + "." + body;
+    }
+ 
+    @Override
+    public String toString() {
+        return toStringDot();
+    }
+
 }

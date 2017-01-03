@@ -2,44 +2,59 @@ package lambda;
 
 public class Application implements Term {
     
-    final Term head;
-    final Term tail;
+    final Term head, tail;
     
-    public Application(Term head, Term tail) {
+    Application(Term head, Term tail) {
+        if (head == null) throw new IllegalArgumentException("head is null");
+        if (tail == null) throw new IllegalArgumentException("tail is null");
         this.head = head;
         this.tail = tail;
     }
-
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Term))
-            return false;
-        Term o = (Term)obj;
-        return o.normalize().eq(normalize());
-    }
-
+    
     @Override
-    public boolean eq(Object obj) {
+    public Term reduce(Context context) {
+        Term function = head.reduce(context);
+        if (function instanceof Applicable)
+            return ((Applicable)function).apply(tail, context);
+        else
+            return new Application(function, tail.reduce(context));
+    }
+    
+    @Override
+    public Term normalize(NormalizeContext context) {
+        return new Application(head.normalize(context), tail.normalize(context));
+    }
+    
+    @Override
+    public boolean containsBoundVariable(Lambda lambda) {
+        return head.containsBoundVariable(lambda)
+            || tail.containsBoundVariable(lambda);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
         if (!(obj instanceof Application))
             return false;
         Application o = (Application)obj;
-        return o.head.eq(head) && o.tail.eq(tail);
+        return o.head.equals(head) && o.tail.equals(tail);
     }
     
-    @Override
-    public Term evalCore(Context context) {
-        Term function = head.eval(context);
-        Term argument = tail.eval(context);
-        if (function instanceof Applicable)
-            return ((Applicable)function).apply(argument, context);
-        else
-            return new Application(function, argument);
-    }
-    
-    @Override
-    public Term normalize(Context context) {
-        return new Application(head.normalize(context), tail.normalize(context));
-    }
-   
+    /**
+     * Lambdaの場合
+     * Variable -> x.V -> x.V
+     * Application -> x.U V
+     * Lambda -> x.y.X
+     * 
+     * Applicationの場合
+     * head =
+     * Variable -> V T
+     * Application -> A X T
+     * Lambda -> x.B T
+     * tail =
+     * Variable -> H V
+     * Application -> H (A X)
+     * Lambda -> H x.B
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -48,7 +63,7 @@ public class Application implements Term {
         if (headIsLambda) sb.append("(");
         sb.append(head);
         if (headIsLambda) sb.append(")");
-        if (!headIsLambda && !tailIsApplication) sb.append(" ");
+        sb.append(" ");
         if (tailIsApplication) sb.append("(");
         sb.append(tail);
         if (tailIsApplication) sb.append(")");
