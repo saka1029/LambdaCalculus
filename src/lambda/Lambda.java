@@ -29,7 +29,12 @@ public class Lambda implements Term, Applicable {
             lambda.body = body.reduce(context);
         }
         Term e = lambda.etaConversion();
-        if (e != null) return e.reduce(context);
+        if (e != null) {
+            context.enter("η", this);
+            Term reduced = e.reduce(context);
+            context.exit(reduced);
+            return reduced;
+        }
         return lambda;
     }
     

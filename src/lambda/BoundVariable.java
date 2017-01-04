@@ -13,7 +13,7 @@ public class BoundVariable implements Variable {
     public Term reduce(Context context) {
         return context.bound.getOrDefault(lambda, this);
     }
-    
+ 
     @Override
     public Term normalize(NormalizeContext context) {
         return context.getOrDefault(lambda, this);

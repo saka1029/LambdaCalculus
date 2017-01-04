@@ -2,9 +2,11 @@ package test.lambda;
 
 import static org.junit.Assert.*;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import lambda.Context;
+import lambda.UnboundVariable;
 
 import static lambda.LambdaCalculus.*;
 
@@ -34,32 +36,49 @@ public class TestLambdaCalculus {
         equalsNormalized("x.x.x", "(y.x.y) x.x", c);
         equalsNormalized("x.y.y", "(y.x.y) x.x", c);
         equalsNormalized("x.x", "(x.(x.x x) x) y.y", c);
+        equalsNormalized("x.y.x", "define true λx y.x", c);
+        equalsNormalized("λx x y.x", "define nil λx.true", c);
+        equalsNormalized("λz x y.x", "λx.true", c);
+        equalsNormalized("true", "nil K", c);
+        // x.true x -> x.(x.y.x) x -> x.y.x
+        // z.true z -> z.(x.y.x) z -> apply x to z -> z.(y.z) -> z.y.z
+        equalsNormalized("x.y.x", "x.true x", c);
+        equalsNormalized("x.y.x", "x.(x.y.x) x", c);
+        equalsNormalized("z.x.y.x x", "x.x.y.x x", c);
+        equalsNormalized("x.y.x", "z.true z", c);
+        equalsNormalized("x.x x.y.x", "x.x true", c);
+        equalsNormalized("K true", "(x.x true) K", c);
     }
     
     /**
-     * Sample Interpretations
+     * <b>Sample Interpretations</b><br>
      * Below are some lambda calculus interpretation test cases:
-     * Expression Result Comment
-     * (\x.\y.(y x) (y w))  ->  \z.(z (y * w)) * Avoid capturing the free variable y in (y w)
-     * (\x.\y.(x y) (y w))  ->  (y w)          * Avoid capturing the free variable yin (y w), and perform eta reduction
-     * (\x.x y)             ->  y              * Identity combinator
-     * \x.(y x)             ->  y              * Eta reduction
-     * ((\y.\x.(y x) \x.(x x)) y) -> (y y)     * Application combinator
+     * <pre><code>
+     * Expression               Result           Comment
+     * (\x.\y.(y x) (y w))  ->  \z.(z (y * w))    * Avoid capturing the free variable y in (y w)
+     * (\x.\y.(x y) (y w))  ->  (y w)             * Avoid capturing the free variable yin (y w), and perform eta reduction
+     * (\x.x y)             ->  y                 * Identity combinator
+     * \x.(y x)             ->  y                 * Eta reduction
+     * ((\y.\x.(y x) \x.(x x)) y) -> (y y)        * Application combinator
      * (((\b.\t.\e.((b t) e) \x.\y.x) x) y) -> x  * If-then-else combinator
-     * \x.((\x.(y x) \x.(z x)) x)  ->  (y z)   * Eta reductions
-     * (\y.(\x.\y.(x y) y) (y w))  ->  (y w)   * Alpha renaming, beta reduction and eta reduction all * involved
+     * \x.((\x.(y x) \x.(z x)) x)  ->  (y z)      * Eta reductions
+     * (\y.(\x.\y.(x y) y) (y w))  ->  (y w)      * Alpha renaming, beta reduction and eta reduction all * involved
+     * </code><pre>
+     * @see <a href="http://www.cs.rpi.edu/academics/courses/fall16/proglang/pa1/programming_assignment_1.pdf"
+     * >Programming Assignment #1</a>
      */
     @Test
     public void testProgrammingAssignment() {
         Context c = defaultContext();
+        // (\x.\y.(y x) (y w))  ->  \z.(z (y * w))    * Avoid capturing the free variable y in (y w)
         equalsNormalized("z.z (y w)", "(x.y.y x) (y w)", c);
-        // η-reduction
+        // (\x.\y.(x y) (y w))  ->  (y w)             * Avoid capturing the free variable yin (y w), and perform eta reduction
         equalsNormalized("y w", "(x.y.x y) (y w)", c);
-        // identity combinator
+        // (\x.x y)             ->  y                 * Identity combinator
         equalsNormalized("y", "(x.x) y", c);
-        // η-reduction
+        // \x.(y x)             ->  y                 * Eta reduction
         equalsNormalized("y", "x.y x", c);
-        // application combinator
+        // ((\y.\x.(y x) \x.(x x)) y) -> (y y)        * Application combinator
         equalsNormalized("y y", "((y.x.y x) x.x x) y", c);
         // (((\b.\t.\e.((b t) e) \x.\y.x) x) y) -> x  * If-then-else combinator
         equalsNormalized("x", "(b.t.e.b t e) (x.y.x) x y", c); // ifThenElse true x y
@@ -120,6 +139,29 @@ public class TestLambdaCalculus {
         reduce("define + m.n.m succ n", c);
         reduce("define * m.n.m (+ n) 0", c);
         reduce("define pred n.f.x.n (g.h.h (g f)) (u.x) (u.u)", c);
+        assertEquals(normalize("1", c), normalize("succ 0", c));
+        assertEquals(normalize("2", c), normalize("succ 1", c));
+        assertEquals(normalize("5", c), normalize("+ 2 3", c));
+        assertEquals(normalize("6", c), normalize("* 2 3", c));
+        assertEquals(normalize("4", c), normalize("* (+ 0 2) (+ 1 1)", c));
+        assertEquals(normalize("3", c), normalize("pred 4", c));
+        System.out.println(reduce("f.x.f x", c));
+    }
+
+    @Test
+    public void testNumeralsLambda() {
+        Context c = defaultContext();
+        reduce("define 0 λf x.x", c);
+        reduce("define 1 λf x.f x", c);
+        reduce("define 2 λf x.f (f x)", c);
+        reduce("define 3 λf x.f( f (f x))", c);
+        reduce("define 4 λf x.f( f( f (f x)))", c);
+        reduce("define 5 λf x.f( f( f( f (f x))))", c);
+        reduce("define 6 λf x.f( f( f( f( f (f x)))))", c);
+        reduce("define succ λn f x.f (n f x)", c);
+        reduce("define + m.n.m succ n", c);
+        reduce("define * m.n.m (+ n) 0", c);
+        reduce("define pred λn f x.n (λg h.h (g f)) (λu.x) (λu.u)", c);
         assertEquals(normalize("1", c), normalize("succ 0", c));
         assertEquals(normalize("2", c), normalize("succ 1", c));
         assertEquals(normalize("5", c), normalize("+ 2 3", c));
@@ -194,7 +236,26 @@ public class TestLambdaCalculus {
         assertEquals(normalize("nil", c), normalize("cdr (cdr (cdr ABC))", c));
         assertEquals(normalize("cons B (cons C nil)", c), normalize("cdr ABC", c));
         System.out.println(reduce("ABC", c));
+    }
+    
+    /**
+     * Fixed point combinators in lambda calculus
+     * The Y combinator, discovered by Haskell B. Curry, is defined as:
 
+     * Y=λ f.(λ x.f (x x)) (λ x.f (x x))
+     * Yコンビネータ
+     * 型無しラムダ計算においてよく知られた（そしておそらく最もシンプルな）
+     * 不動点コンビネータはYコンビネータと呼ばれる。
+     * これはハスケル・カリーによって発見されたもので、次のように定義される。
+     * Y = (λf . (λx . f (x x)) (λx . f (x x)))
+     */
+    @Ignore
+    @Test(expected = StackOverflowError.class)
+    public void testYCombinator() {
+        // Y=λ f.(λ x.f (x x)) (λ x.f (x x))
+        Context c = defaultContext();
+        reduce("define Y λ f.(λ x.f (x x)) (λ x.f (x x))", c);
+        assertEquals(normalize("g (Y g)", c), normalize("Y g", c));
     }
     
 }

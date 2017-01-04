@@ -21,6 +21,7 @@ Lambda = Variable '.' Term
 
 A variable is an identifier consisting of one or more alphanumeric characters.
 You can also use characters `+`,  `-`,  `*`,  `/`, `|`,  `!`, `^` and  `%` as a part of variable.
+`$` is reserved for internal usage.
 
 ### Lambda
 
@@ -67,7 +68,7 @@ And the program prints the result of evaluation (for example `V C`).
 
 ### Built-in functions.
 
-* **define V E** -- Define the variable V holds the value E.
+* **define V E** -- Define the variable V holds the value E reduced.
 * **trace B** -- `trace true` starts trace mode.  and `trace false` ends trace mode.
 * **and B C** -- Returns a boolean value B and C.  That is `p.q.p q p`.
 * **or B C** -- Returns a boolean value B or C.  That is `p.q.p p q`.
@@ -81,14 +82,14 @@ Church numerals represents natural numbers in lambda term like this.
 ```
 0   = a.b.b
 1   = a.b.a b
-2   = a.b.a(a b)
-3   = a.b.a(a(a b))
+2   = a.b.a (a b)
+3   = a.b.a (a (a b))
 ```
 
 `n`を受け取って`n + 1`を返す関数`succ`は以下のように表現します。
 
 ```
-succ = n.f.x.f(n f x)
+succ = n.f.x.f (n f x)
 ```
 
 `succ n0`は以下のように評価されます。

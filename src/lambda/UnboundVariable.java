@@ -20,7 +20,14 @@ public class UnboundVariable implements Variable {
     
     @Override
     public Term reduce(Context context) {
-        return context.unbound.getOrDefault(this, this);
+//        return context.unbound.getOrDefault(this, this);
+        Term reduced = context.unbound.get(this);
+        if (reduced != null) {
+            if (reduced != this)
+                context.enterExit(this, reduced);
+        } else
+            reduced = this;
+        return reduced;
     }
     
     @Override

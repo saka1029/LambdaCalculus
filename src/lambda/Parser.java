@@ -123,7 +123,7 @@ public class Parser {
     public Term parse() {
         Term r = parseTerm();
         if (ch != EOS)
-            throw new RuntimeException("Unread string: " + source.substring(index - 1));
+            throw new RuntimeException("Extra string: " + source.substring(index - 1));
         return r;
     }
 }
