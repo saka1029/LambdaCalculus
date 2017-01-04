@@ -59,7 +59,13 @@ public class LambdaCalculus {
     public static void main(String[] args) throws IOException {
         Context c = defaultContext();
         InputStream in = System.in;
+        boolean echo = false;
         String prompt = "% ";
+        for (String s : args) {
+            switch (s) {
+            case "-e": echo = true; break;
+            }
+        }
         try (InputStream is = in;
             Reader r = new InputStreamReader(is);
             BufferedReader reader = new BufferedReader(r)) {
@@ -67,11 +73,16 @@ public class LambdaCalculus {
                 System.out.print(prompt);
                 String line = reader.readLine();
                 if (line == null) break;
+                if (echo) System.out.println(line);
                 line = line.replaceFirst("#.*", "");
                 if (line.equalsIgnoreCase("exit")) break;
                 if (line.equalsIgnoreCase("quit")) break;
-                Term term = reduce(line, c);
-                System.out.println(term);
+                try {
+                    Term term = reduce(line, c);
+                    System.out.println(term);
+                } catch (RuntimeException e) {
+                    System.err.println(e.getMessage());
+                }
             }
         }
     }

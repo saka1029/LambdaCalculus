@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>C:\git\LambdaCalculus\.readme.md.html</title>
+<title>C:\git\LambdaCalculus\doc\.名前の衝突.md.html</title>
 
 
 <style type="text/css">
@@ -639,95 +639,13 @@ function setDocumentScrollTop(ypos)
 
 </head>
 <body class="markdown-body">
-<h1> <a id="lambda-calculus-in-java" class="anchor" href="#lambda-calculus-in-java" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Lambda calculus in Java</h1> 
-<p>This is an implementation of <a href="https://en.wikipedia.org/wiki/Lambda_calculus">lambda calculus</a> processor in Java.</p> 
-<h2> <a id="syntax" class="anchor" href="#syntax" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Syntax</h2> 
-<pre><code>Term   = Factor
-       | Term Factor
-
-Factor = Variable
-       | Lambda
-       | '(' Term ')'
-
-Lambda = Variable '.' Term
-       | 'λ' Variable { Variable } '.' Term
-       | '\' Variable { Variable } '.' Term
+<h1> <a id="名前の衝突" class="anchor" href="#%E5%90%8D%E5%89%8D%E3%81%AE%E8%A1%9D%E7%AA%81" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>名前の衝突</h1> 
+<pre><code>define true x.y.x
 </code></pre> 
-<h3> <a id="variable" class="anchor" href="#variable" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Variable</h3> 
-<p>A variable is an identifier consisting of one or more alphanumeric characters. You can also use characters <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>|</code>, <code>!</code>, <code>^</code> and <code>%</code> as a part of variable. <code>$</code> is reserved for internal usage.</p> 
-<h3> <a id="lambda" class="anchor" href="#lambda" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Lambda</h3> 
-<p>Normally, the lambda expression is expressed as <code>λ variables . body</code>, but in this program it is expressed as <code>variable . body</code>. Since only one variable is permitted, if there are two or more variables, it must be with currying. So you must express the lambda term <code>λxy.x</code> as <code>x.y.x</code>. The dot operator (<code>.</code>) is right associative. So the lambda term <code>x.y.x</code> is equivalent to <code>x.(y.x)</code>.</p> 
-<h3> <a id="application" class="anchor" href="#application" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Application</h3> 
-<p>An application <code>t s</code> represents the application of a function <code>t</code> to an input <code>s</code>, that is, it represents the act of calling function <code>t</code> on input <code>s</code> to produce <code>t(s)</code>. The application operator (<code></code>) is left associative. So the lambda term <code>x y z</code> is equivalent to <code>(x y) z</code>.</p> 
-<h2> <a id="command-line" class="anchor" href="#command-line" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Command line</h2> 
-<p>You can start REPL (Read Evaluation Print Loop) like this.</p> 
-<pre><code>C:\projects\LambdaCalculus&gt; <b>java -cp bin lambda.Term</b>
-% <b>(x.x C) V</b>
-V C
-% <b>exit</b>
-
-C:\projects\LambdaCalculus&gt;</code></pre> 
-<p><code>%</code> is the prompt. You can type a lambda term (for example <code>(x.x C) V</code>). And the program prints the result of evaluation (for example <code>V C</code>).</p> 
-<h3> <a id="special-commands" class="anchor" href="#special-commands" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Special commands</h3> 
-<ul> 
- <li> <strong>exit</strong> -- Terminate REPL.</li> 
- <li> <strong>quit</strong> -- Terminate REPL.</li> 
-</ul> 
-<h3> <a id="built-in-variables" class="anchor" href="#built-in-variables" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Built-in variables</h3> 
-<ul> 
- <li> <strong>true</strong> -- The true value as lambda term. That is <code>x.y.x</code> </li> 
- <li> <strong>false</strong> -- The false value as lambda term. That is <code>x.y.y</code> </li> 
-</ul> 
-<h3> <a id="built-in-functions" class="anchor" href="#built-in-functions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Built-in functions.</h3> 
-<ul> 
- <li> <strong>define V E</strong> -- Define the variable V holds the value E reduced.</li> 
- <li> <strong>trace B</strong> -- <code>trace true</code> starts trace mode. and <code>trace false</code> ends trace mode.</li> 
- <li> <strong>and B C</strong> -- Returns a boolean value B and C. That is <code>p.q.p q p</code>.</li> 
- <li> <strong>or B C</strong> -- Returns a boolean value B or C. That is <code>p.q.p p q</code>.</li> 
- <li> <strong>not B</strong> -- Returns a boolean value not B. That is <code>p.p true false</code>.</li> 
-</ul> 
-<h2> <a id="church-numerals" class="anchor" href="#church-numerals" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Church numerals</h2> 
-<p>Church numerals represents natural numbers in lambda term like this.</p> 
-<pre><code>0   = a.b.b
-1   = a.b.a b
-2   = a.b.a (a b)
-3   = a.b.a (a (a b))
+<pre><code>x.true x
 </code></pre> 
-<p><code>n</code>を受け取って<code>n + 1</code>を返す関数<code>succ</code>は以下のように表現します。</p> 
-<pre><code>succ = n.f.x.f (n f x)
+<pre><code>x.(x.y.x) x
 </code></pre> 
-<p><code>succ n0</code>は以下のように評価されます。</p> 
-<pre><code>&gt; succ n0 : {n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
- &gt; succ : {n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
- &lt; n.f.x.f(n f x)
- &gt; n0 : {n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
- &lt; a.b.b
- &gt; f.x.f(n f x) : {n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-  &gt; x.f(n f x) : {f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-   &gt; f(n f x) : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-    &gt; f : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-    &lt; f
-    &gt; n f x : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-     &gt; n f : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-      &gt; n : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-      &lt; a.b.b
-      &gt; f : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-      &lt; f
-      &gt; b.b : {a=f, x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-       &gt; b : {b=b, a=f, x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-       &lt; b
-      &lt; b.b
-     &lt; b.b
-     &gt; x : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-     &lt; x
-     &gt; b : {b=x, x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-     &lt; x
-    &lt; x
-   &lt; f x
-  &lt; x.f x
- &lt; f.x.f x
-&lt; f.x.f x
-</code></pre> 
-<p>結果は<code>f.x.f x</code>なので前述の<code>n1</code>つまり<code>a.b.a b</code>に一致することがわかります。</p>
+<p><a href="./%E5%90%8D%E5%89%8D%E3%81%AE%E8%A1%9D%E7%AA%811.png" target="_blank"><img src="./%E5%90%8D%E5%89%8D%E3%81%AE%E8%A1%9D%E7%AA%811.png" alt="" style="max-width:100%;" /></a></p>
 </body>
 </html>
