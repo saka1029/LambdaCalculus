@@ -22,12 +22,12 @@ public class TestLambda {
     }
 
     @Test
-    public void testToString() {
+    public void testToStringDot() {
         testToStringDot("x.x", "x.x");
         testToStringDot("x.x", "λx.x");
-        testToStringDot("x.y.x", "x.y.x");
-        testToStringDot("x.y.x", "λx.λy.x");
-        testToStringDot("x.y.x", "λx y.x");
+        testToStringDot("x.λy.x", "x.y.x");
+        testToStringDot("x.λy.x", "λx.λy.x");
+        testToStringDot("x.λy.x", "λx y.x");
     }
 
     static void testToStringLambda(String expected, String term) {

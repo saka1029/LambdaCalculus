@@ -1,11 +1,9 @@
 package lambda;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 public class Context {
  
