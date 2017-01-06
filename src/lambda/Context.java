@@ -1,7 +1,11 @@
 package lambda;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class Context {
  
@@ -18,23 +22,27 @@ public class Context {
             System.out.print("  ");
     }
 
-    void enterExit(Term t, Term u) {
-        indent();
-        System.out.println(" = " + t + " -> " + u);
-    }
-
     void enter(String type, Term t) {
+        if (!LambdaCalculus.TRACE) return;
         indent();
-        System.out.println(type + "> " + t + " " + bound);
+        System.out.println(type + "> " + t + " " + boundNames());
         ++indent;
     }
     
-    void exit(Term t) {
+    void exit(String type, Term t) {
+        if (!LambdaCalculus.TRACE) return;
         --indent;
         indent();
-        System.out.println(" < " + t);
+        System.out.println(type + "< " + t);
     }
  
+    public Map<String, Term> boundNames() {
+        Map<String, Term> names = new HashMap<>();
+        for (Entry<Lambda, Term> e : bound.entrySet())
+            names.put(e.getKey().name, e.getValue());
+        return names;
+    }
+
     @Override
     public String toString() {
         return String.format("{bound=%s, unbound=%s}", bound, unbound);

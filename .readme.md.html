@@ -639,95 +639,124 @@ function setDocumentScrollTop(ypos)
 
 </head>
 <body class="markdown-body">
-<h1> <a id="lambda-calculus-in-java" class="anchor" href="#lambda-calculus-in-java" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Lambda calculus in Java</h1> 
-<p>This is an implementation of <a href="https://en.wikipedia.org/wiki/Lambda_calculus">lambda calculus</a> processor in Java.</p> 
-<h2> <a id="syntax" class="anchor" href="#syntax" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Syntax</h2> 
-<pre><code>Term   = Factor
-       | Term Factor
+<h1> <a id="javaによるラムダ計算の実装" class="anchor" href="#java%E3%81%AB%E3%82%88%E3%82%8B%E3%83%A9%E3%83%A0%E3%83%80%E8%A8%88%E7%AE%97%E3%81%AE%E5%AE%9F%E8%A3%85" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Javaによるラムダ計算の実装</h1> 
+<p>このプログラムはJavaで <a href="https://ja.wikipedia.org/wiki/%E3%83%A9%E3%83%A0%E3%83%80%E8%A8%88%E7%AE%97">ラムダ計算</a> を実装したものです。</p> 
+<h2> <a id="文法" class="anchor" href="#%E6%96%87%E6%B3%95" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>文法</h2> 
+<p>EBNFで記述した文法は以下のようになります。</p> 
+<pre><code>式     = 因子 { 因子 }
 
-Factor = Variable
-       | Lambda
-       | '(' Term ')'
+因子   = 変数
+       | ラムダ
+       | '(' 式 ')'
 
-Lambda = Variable '.' Term
-       | 'λ' Variable { Variable } '.' Term
-       | '\' Variable { Variable } '.' Term
+ラムダ = 変数 '.' 因子
+       | 'λ' 変数 { 変数 } '.' 式
+       | '\' 変数 { 変数 } '.' 式
 </code></pre> 
-<h3> <a id="variable" class="anchor" href="#variable" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Variable</h3> 
-<p>A variable is an identifier consisting of one or more alphanumeric characters. You can also use characters <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>|</code>, <code>!</code>, <code>^</code> and <code>%</code> as a part of variable. <code>$</code> is reserved for internal usage.</p> 
-<h3> <a id="lambda" class="anchor" href="#lambda" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Lambda</h3> 
-<p>Normally, the lambda expression is expressed as <code>λ variables . body</code>, but in this program it is expressed as <code>variable . body</code>. Since only one variable is permitted, if there are two or more variables, it must be with currying. So you must express the lambda term <code>λxy.x</code> as <code>x.y.x</code>. The dot operator (<code>.</code>) is right associative. So the lambda term <code>x.y.x</code> is equivalent to <code>x.(y.x)</code>.</p> 
-<h3> <a id="application" class="anchor" href="#application" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Application</h3> 
-<p>An application <code>t s</code> represents the application of a function <code>t</code> to an input <code>s</code>, that is, it represents the act of calling function <code>t</code> on input <code>s</code> to produce <code>t(s)</code>. The application operator (<code></code>) is left associative. So the lambda term <code>x y z</code> is equivalent to <code>(x y) z</code>.</p> 
-<h2> <a id="command-line" class="anchor" href="#command-line" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Command line</h2> 
-<p>You can start REPL (Read Evaluation Print Loop) like this.</p> 
-<pre><code>C:\projects\LambdaCalculus&gt; <b>java -cp bin lambda.Term</b>
+<h3> <a id="変数" class="anchor" href="#%E5%A4%89%E6%95%B0" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>変数</h3> 
+<p>変数はJavaの識別子として使える文字は<code>$</code>と<code>λ</code>を除いてすべて使えます。 数字や <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>&amp;</code>, <code>|</code>, <code>!</code>, <code>^</code>, <code>%</code> も使えます。</p> 
+<h3> <a id="ラムダ" class="anchor" href="#%E3%83%A9%E3%83%A0%E3%83%80" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ラムダ</h3> 
+<p><a href="https://ja.wikipedia.org/wiki/%E3%83%A9%E3%83%A0%E3%83%80%E8%A8%88%E7%AE%97">Wikipedia</a> に記述されている文法の内、ラムダ式の表記法を拡張しています。 通常のラムダ式は以下のように記述します。</p> 
+<pre><code>λx y.x y
+</code></pre> 
+<p>これは<code>x</code>と<code>y</code>を受け取って<code>x y</code> (<code>x</code>に<code>y</code>を適用する)を返す式です。</p> 
+<p>このプログラムではこれを以下のように表記することができます。</p> 
+<ol> 
+ <li> <code>λx.λy.x y</code> - カリー化（単一の引数に限定）した表記</li> 
+ <li> <code>\x y.x y</code> - <code>λ</code>を<code>\</code>で表記</li> 
+ <li> <code>\x.\y.x y</code> - <code>\</code>表記をカリー化した表記</li> 
+ <li> <code>x.y.x y</code> - カリー化して<code>λ</code>を省略した表記</li> 
+</ol> 
+<p><code>λ</code>はすべてのラムダ式をカリー化した場合のみ省略することができます。 <code>λ</code>を省略した場合、ラムダ式を構成する<code>.</code>は演算子と考えることができます。 これは右結合の演算子で、<code>x.y.x</code>は<code>x.(y.x)</code>と同じです。</p> 
+<h3> <a id="適用" class="anchor" href="#%E9%81%A9%E7%94%A8" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>適用</h3> 
+<p><code>t s</code> は<code>t</code>に<code>s</code>を適用することを表します。 これは関数<code>t(x)</code>に対して引数<code>s</code>を適用して呼び出すことに相当します。 適用は右結合の演算子と考えることができます。 そのため<code>x y z</code>は<code>(x y) z</code>と同じ意味になります。 <code>x.y.z.x y z</code>は<code>x.(y.(z.((x y) z)))</code>と同じです。</p> 
+<h2> <a id="コマンドラインからの実行" class="anchor" href="#%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%83%A9%E3%82%A4%E3%83%B3%E3%81%8B%E3%82%89%E3%81%AE%E5%AE%9F%E8%A1%8C" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>コマンドラインからの実行</h2> 
+<p>コマンドラインから実行する方法は以下のとおりです。</p> 
+<pre><code>C:\Users\saka1029&gt; <b>java -jar LambdaCalculus.jar</b>
 % <b>(x.x C) V</b>
 V C
-% <b>exit</b>
-
-C:\projects\LambdaCalculus&gt;</code></pre> 
-<p><code>%</code> is the prompt. You can type a lambda term (for example <code>(x.x C) V</code>). And the program prints the result of evaluation (for example <code>V C</code>).</p> 
-<h3> <a id="special-commands" class="anchor" href="#special-commands" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Special commands</h3> 
-<ul> 
- <li> <strong>exit</strong> -- Terminate REPL.</li> 
- <li> <strong>quit</strong> -- Terminate REPL.</li> 
-</ul> 
-<h3> <a id="built-in-variables" class="anchor" href="#built-in-variables" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Built-in variables</h3> 
-<ul> 
- <li> <strong>true</strong> -- The true value as lambda term. That is <code>x.y.x</code> </li> 
- <li> <strong>false</strong> -- The false value as lambda term. That is <code>x.y.y</code> </li> 
-</ul> 
-<h3> <a id="built-in-functions" class="anchor" href="#built-in-functions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Built-in functions.</h3> 
-<ul> 
- <li> <strong>define V E</strong> -- Define the variable V holds the value E reduced.</li> 
- <li> <strong>trace B</strong> -- <code>trace true</code> starts trace mode. and <code>trace false</code> ends trace mode.</li> 
- <li> <strong>and B C</strong> -- Returns a boolean value B and C. That is <code>p.q.p q p</code>.</li> 
- <li> <strong>or B C</strong> -- Returns a boolean value B or C. That is <code>p.q.p p q</code>.</li> 
- <li> <strong>not B</strong> -- Returns a boolean value not B. That is <code>p.p true false</code>.</li> 
-</ul> 
-<h2> <a id="church-numerals" class="anchor" href="#church-numerals" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Church numerals</h2> 
-<p>Church numerals represents natural numbers in lambda term like this.</p> 
-<pre><code>0   = a.b.b
-1   = a.b.a b
-2   = a.b.a (a b)
-3   = a.b.a (a (a b))
+% <b>exit</b></code></pre> 
+<p>プロンプト<code>%</code>に続けて 式をタイプするとそれを簡約した結果が表示されます。 <code>exit</code>とタイプするとプログラムは終了します。</p> 
+<h3> <a id="実行例" class="anchor" href="#%E5%AE%9F%E8%A1%8C%E4%BE%8B" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>実行例</h3> 
+<p><a href="https://ja.wikipedia.org/wiki/%E3%83%A9%E3%83%A0%E3%83%80%E8%A8%88%E7%AE%97#.E8.87.AA.E7.84.B6.E6.95.B0.E3.81.A8.E7.AE.97.E8.A1.93">チャーチ数</a> は自然数をラムダ式として表現したものです。 Wikipediaの記述をそのままコマンドラインで実行すると以下のようになります。</p> 
+<pre><code>% define 0 λa b.b
+λa b.b
+% define 1 λa b.a b
+λa.a
+% define 2 λa b.a (a b)
+λa b.a (a b)
+% define 3 λa b.a (a (a b))
+λa b.a (a (a b))
+% define SUCC λn f x.f (n f x)
+λn f x.f (n f x)
+% define PLUS λm n f.λx.m f (n f x)
+λm n f x.m f (n f x)
+% define MULT λm n f.m (n f)
+λm n f.m (n f)
+% SUCC 0
+λf.f
+% SUCC (SUCC 1)
+λf x.f (f (f x))
+% PLUS 2 3
+λf x.f (f (f (f (f x))))
+% MULT 2 3
+λf b.f (f (f (f (f (f b)))))
 </code></pre> 
-<p><code>n</code>を受け取って<code>n + 1</code>を返す関数<code>succ</code>は以下のように表現します。</p> 
-<pre><code>succ = n.f.x.f (n f x)
+<h3> <a id="組み込みコマンド" class="anchor" href="#%E7%B5%84%E3%81%BF%E8%BE%BC%E3%81%BF%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>組み込みコマンド</h3> 
+<ul> 
+ <li> <strong>exit</strong>, <strong>quit</strong> - プログラムを終了します。</li> 
+</ul> 
+<h3> <a id="組み込み関数" class="anchor" href="#%E7%B5%84%E3%81%BF%E8%BE%BC%E3%81%BF%E9%96%A2%E6%95%B0" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>組み込み関数</h3> 
+<ul> 
+ <li> <strong><code>define V E</code></strong> - <code>E</code>を簡約した結果を変数<code>V</code>に設定します。</li> 
+</ul> 
+<h2> <a id="api" class="anchor" href="#api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API</h2> 
+<h2> <a id="正規化" class="anchor" href="#%E6%AD%A3%E8%A6%8F%E5%8C%96" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>正規化</h2> 
+<p>Term#equals()は字面で比較を行うので<code>x.x</code>と<code>y.y</code>は等しくなりません。 式としての等値性を調べる場合は、それぞれを正規化してから比較する必要があります。 正規化する場合はTerm#normalize()を使用します。</p> 
+<pre><code>Context c = defaultContext();
+Term xx = term(&quot;x.x&quot;);
+Term yy = term(&quot;y.y&quot;);
+assertNotEquals(yy, xx);
+assertEquals(yy.normalize(), xx.normalize());
 </code></pre> 
-<p><code>succ n0</code>は以下のように評価されます。</p> 
-<pre><code>&gt; succ n0 : {n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
- &gt; succ : {n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
- &lt; n.f.x.f(n f x)
- &gt; n0 : {n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
- &lt; a.b.b
- &gt; f.x.f(n f x) : {n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-  &gt; x.f(n f x) : {f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-   &gt; f(n f x) : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-    &gt; f : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-    &lt; f
-    &gt; n f x : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-     &gt; n f : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-      &gt; n : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-      &lt; a.b.b
-      &gt; f : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-      &lt; f
-      &gt; b.b : {a=f, x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-       &gt; b : {b=b, a=f, x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-       &lt; b
-      &lt; b.b
-     &lt; b.b
-     &gt; x : {x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-     &lt; x
-     &gt; b : {b=x, x=x, f=f, n=a.b.b, n3=a.b.a(a(a b)), n2=a.b.a(a b), n1=a.b.a b, n0=a.b.b, plus=m.n.f.x.m f(n f x), succ=n.f.x.f(n f x)}
-     &lt; x
-    &lt; x
-   &lt; f x
-  &lt; x.f x
- &lt; f.x.f x
-&lt; f.x.f x
+<p><code>x.x</code>や<code>y.y</code>を正規化した結果はどちらも以下のようになります。</p> 
+<pre><code>$0.$0
 </code></pre> 
-<p>結果は<code>f.x.f x</code>なので前述の<code>n1</code>つまり<code>a.b.a b</code>に一致することがわかります。</p>
+<p>式の先頭からみて束縛変数が出現する都度それを<code>$0</code>, <code>$1</code> ... に置換します。 冒頭で述べたように<code>$</code>を含む変数は使用できないので注意してください。 これはParserが<code>$</code>の使用を制限しているだけなので、 正規化した結果を簡約すること自体は可能です。</p> 
+<h2> <a id="η-変換" class="anchor" href="#%CE%B7-%E5%A4%89%E6%8F%9B" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>η-変換</h2> 
+<p>η-変換は束縛変数の名前を変更する処理です。 例えば以下の式を簡約してみます。</p> 
+<pre><code>(λx.λy.y x) (λx.y)
+</code></pre> 
+<p>何も考えずに<code>x</code>を<code>λx.y</code>で置換すると以下のようになります。</p> 
+<pre><code>λy.y (λx.y)
+</code></pre> 
+<p>元の式の最後にあった<code>y</code>は自由変数ですが、 置換後の式の最後にある<code>y</code>は束縛変数のように見えます。 この場合に以下のような式に変換するのがη-変換です。</p> 
+<pre><code>λz.z (λx.y)
+</code></pre> 
+<p>このプログラムではη-変換を実装していません。 η-変換を行わなくても簡約が正しく行われるようにしているためです。 このことを理解するためにはクラスの構成を見てみる必要があります。 このプログラムの簡単なクラス図は以下のようになっています。</p> 
+<p><a href="ClassDiagram.png" target="_blank"><img src="ClassDiagram.png" alt="クラス図" style="max-width:100%;" /></a></p> 
+<p><code>Variable</code>は変数を表すインタフェースですが、 <code>BoundVariable</code>と<code>UnboundVariable</code>の二つの実装があります。 <code>BoundVariable</code>はいずれかのラムダ式に束縛されている束縛変数です。 自分自身を束縛している<code>Lambda</code>を参照しています。 <code>UnboundVariable</code>はどのラムダ式にも束縛されていない自由変数です。</p> 
+<p>例えば<code>λx.λy.x K</code>のインスタンスは以下のようになります。</p> 
+<p><a href="x.y.xK.png" target="_blank"><img src="x.y.xK.png" alt="λx.λy.x K" style="max-width:100%;" /></a></p> 
+<p>インスタンス<code>x:BoundVariable</code>は自分が属するラムダ式への参照を持っています。 インスタンス<code>K:UnboundVariable</code>は どこからも束縛されていないので<code>UnboundVariable</code>のインスタンスになります。</p> 
+<p>先の置換結果(<code>λy.y (λx.y)</code>)のインスタンスは以下のようになります。</p> 
+<p><a href="y.yx.y.png" target="_blank"><img src="y.yx.y.png" alt="λy.y (λx.y)" style="max-width:100%;" /></a></p> 
+<p>同じ名前の変数<code>y</code>が<code>BoundVariable</code>と<code>UnboundVariable</code>に分類されていることがわかります。</p> 
+<p>この実装では簡約の途中で同一名の束縛変数と自由変数が同じ文脈に出現しても 区別されるのでη-変換は不要となります。</p> 
+<h2> <a id="制限事項" class="anchor" href="#%E5%88%B6%E9%99%90%E4%BA%8B%E9%A0%85" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>制限事項</h2> 
+<h3> <a id="termtostring" class="anchor" href="#termtostring" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Term#toString()</h3> 
+<p>Term#toString()は式の文字列表現を返しますが、 正しくない表現を返す場合があります。 例えば以下の式を簡約してみます。</p> 
+<pre><code>(x.y.y x) (x.y)
+</code></pre> 
+<p>末尾にある<code>y</code>は先頭のラムダ式とは無関係なので自由変数です。 簡約した結果は以下のようになります。</p> 
+<pre><code>y.y x.y
+</code></pre> 
+<p>最後の<code>y</code>はどう見ても束縛変数です。 ただし、これはTerm#toString()の問題で、 結果の式を正規化(Term#normalize())すると以下が得られます。</p> 
+<pre><code>$0.$0 $1.y
+</code></pre> 
+<p>最後の<code>y</code>は正しく自由変数として認識されていることがわかります。 本来であればη-変換を行って</p> 
+<pre><code>z.z x.y
+</code></pre> 
+<p>のような結果を返すべきですが、 η-変換を実装していないのでこのような結果になります。 単に表記の問題で簡約を行う上では支障はありません。</p>
 </body>
 </html>

@@ -23,8 +23,10 @@ public class UnboundVariable implements Variable {
 //        return context.unbound.getOrDefault(this, this);
         Term reduced = context.unbound.get(this);
         if (reduced != null) {
-            if (reduced != this)
-                context.enterExit(this, reduced);
+            if (reduced != this) {
+                context.enter("@", this);
+                context.exit("@", reduced);
+            }
         } else
             reduced = this;
         return reduced;

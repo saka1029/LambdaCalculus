@@ -1,6 +1,7 @@
 package lambda;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -8,6 +9,9 @@ import java.io.Reader;
 
 public class LambdaCalculus {
 
+    public static boolean TO_STRING_DOT = false;
+    public static boolean TRACE = false;
+    
     private LambdaCalculus() {}
     
     public static Term term(String source) {
@@ -61,9 +65,14 @@ public class LambdaCalculus {
         InputStream in = System.in;
         boolean echo = false;
         String prompt = "% ";
-        for (String s : args) {
-            switch (s) {
+        for (String arg : args) {
+            switch (arg) {
             case "-e": echo = true; break;
+            case "-t": LambdaCalculus.TRACE = true; break;
+            case "-d": LambdaCalculus.TO_STRING_DOT = true; break;
+            default:
+                in = new FileInputStream(arg);
+                break;
             }
         }
         try (InputStream is = in;

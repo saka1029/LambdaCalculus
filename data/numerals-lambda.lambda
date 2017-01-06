@@ -1,0 +1,11 @@
+define 0 λa b.b
+define 1 λa b.a b
+define 2 λa b.a (a b)
+define 3 λa b.a (a (a b))
+define SUCC λn f x.f (n f x)
+define PLUS λm n f.λx.m f (n f x)
+define MULT λm n f.m (n f)
+SUCC 0
+SUCC (SUCC 1)
+PLUS 2 3
+MULT 2 3

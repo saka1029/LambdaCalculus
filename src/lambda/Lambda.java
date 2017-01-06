@@ -22,17 +22,17 @@ public class Lambda implements Term, Applicable {
 
     @Override
     public Term reduce(Context context) {
-//        Term eta = etaConversion();
-//        if (eta != null) return eta.reduce(context);
         Lambda lambda = new Lambda(name);
         try (Restorable r = context.bound.put(this, new BoundVariable(lambda))) {
+            context.enter("#", this);
             lambda.body = body.reduce(context);
+            context.exit("#", lambda);
         }
         Term e = lambda.etaConversion();
         if (e != null) {
-            context.enter("η", this);
+            context.enter("η", lambda);
             Term reduced = e.reduce(context);
-            context.exit(reduced);
+            context.exit("η", reduced);
             return reduced;
         }
         return lambda;
@@ -40,8 +40,12 @@ public class Lambda implements Term, Applicable {
     
     @Override
     public Term apply(Term argument, Context context) {
+        Term result = null;
         try (Restorable r = context.bound.put(this, argument.reduce(context))) {
-            return body.reduce(context);
+            context.enter("β", this);
+            return result = body.reduce(context);
+        } finally {
+            context.exit("β", result);
         }
     }
     
@@ -91,7 +95,9 @@ public class Lambda implements Term, Applicable {
  
     @Override
     public String toString() {
-        return toStringDot();
+        return LambdaCalculus.TO_STRING_DOT ?
+            toStringDot() :
+            toStringLambda();
     }
 
 }

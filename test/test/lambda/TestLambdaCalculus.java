@@ -49,6 +49,31 @@ public class TestLambdaCalculus {
         equalsNormalized("x.x x.y.x", "x.x true", c);
         equalsNormalized("K true", "(x.x true) K", c);
     }
+        
+    /**
+     * η-renameが必要となる場合 from Wikipedia
+     */
+    @Test
+    public void testRequireEtaRenameFromWikipedia() {
+        Context c = defaultContext();
+        equalsNormalized("z.z (x.y)", "(x.y.y x) (x.y)", c);
+        System.out.println(reduce("(x.y.y x) (x.y)", c));
+        // -> y.y x.y
+        // 最後のyは自由変数である。
+        // 実体としては正しいが、表記としては誤り。
+        System.out.println(normalize("(x.y.y x) (x.y)", c));
+        // -> $0.$0 $1.y
+        //  = z.z x.y
+        // 最後のyが自由変数であることがわかる。
+    }
+    
+    @Test
+    public void testParen() {
+        Context c = defaultContext();
+        equalsNormalized("x.y.x", "define true λx y.x", c);
+        System.out.println(reduce("z.true z", c));
+        System.out.println(term("x.(x.y.x) x"));
+    }
     
     /**
      * <b>Sample Interpretations</b><br>

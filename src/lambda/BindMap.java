@@ -1,6 +1,8 @@
 package lambda;
 
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public class BindMap<K, V> {
     
@@ -35,6 +37,10 @@ public class BindMap<K, V> {
             () -> map.remove(key);
     }
 
+    public Set<Entry<K, V>> entrySet() {
+        return map.entrySet();
+    }
+    
     @Override
     public String toString() {
         return map.toString();

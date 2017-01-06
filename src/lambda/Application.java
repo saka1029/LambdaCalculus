@@ -14,12 +14,9 @@ public class Application implements Term {
     @Override
     public Term reduce(Context context) {
         Term function = head.reduce(context);
-        if (function instanceof Applicable) {
-            context.enter("β", this);
-            Term reduced = ((Applicable)function).apply(tail, context);
-            context.exit(reduced);
-            return reduced;
-        } else
+        if (function instanceof Applicable)
+            return ((Applicable)function).apply(tail, context);
+        else
             return new Application(function, tail.reduce(context));
     }
     
