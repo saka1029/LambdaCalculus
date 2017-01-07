@@ -11,6 +11,8 @@ public class LambdaCalculus {
 
     public static boolean TO_STRING_DOT = false;
     public static boolean TRACE = false;
+    public static UnboundVariable ON = UnboundVariable.of("on");
+    public static UnboundVariable OFF = UnboundVariable.of("off");
     
     private LambdaCalculus() {}
     
@@ -48,6 +50,14 @@ public class LambdaCalculus {
         define(c, "define", (arg0, context0) ->
             (Primitive) (arg1, context1) ->
                 context1.define((UnboundVariable)arg0, arg1.reduce(context1)));
+        define(c, "trace", (arg, context) -> {
+            TRACE = !arg.equals(OFF);
+            return arg;
+        });
+        define(c, "dot", (arg, context) -> {
+            TO_STRING_DOT = !arg.equals(OFF);
+            return arg;
+        });
         return c;
     }
     
@@ -55,7 +65,7 @@ public class LambdaCalculus {
      * Command line processor
      * 
      * [usage]
-     * java lambda.LambdaCalculus [-e]
+     * java lambda.LambdaCalculus [-e] [-t] [-d] [FILENAME]
      * 
      * @param args
      * @throws IOException
@@ -65,24 +75,27 @@ public class LambdaCalculus {
         InputStream in = System.in;
         boolean echo = false;
         String prompt = "% ";
-        for (String arg : args) {
-            switch (arg) {
+        int i;
+        L: for (i = 0; i < args.length; ++i)
+            switch (args[i]) {
             case "-e": echo = true; break;
             case "-t": LambdaCalculus.TRACE = true; break;
             case "-d": LambdaCalculus.TO_STRING_DOT = true; break;
-            default:
-                in = new FileInputStream(arg);
-                break;
+            default: break L;
             }
-        }
+        if (i < args.length)
+            in = new FileInputStream(args[i]);
+        boolean isConsole = System.console() != null && in == System.in;
         try (InputStream is = in;
             Reader r = new InputStreamReader(is);
             BufferedReader reader = new BufferedReader(r)) {
             while (true) {
-                System.out.print(prompt);
+                if (isConsole || echo)
+                    System.out.print(prompt);
                 String line = reader.readLine();
                 if (line == null) break;
-                if (echo) System.out.println(line);
+                if (echo)
+                    System.out.println(line);
                 line = line.replaceFirst("#.*", "");
                 if (line.equalsIgnoreCase("exit")) break;
                 if (line.equalsIgnoreCase("quit")) break;

@@ -24,6 +24,8 @@ public class TestParser {
         assertEquals(UnboundVariable.of("|"), term("|"));
         assertEquals(UnboundVariable.of("&"), term("&"));
         assertEquals(UnboundVariable.of("!"), term("!"));
+        assertEquals(UnboundVariable.of("あいう"), term("あいう"));
+//        assertEquals(UnboundVariable.of("𩸽"), term("𩸽"));
     }
     
     @Test
