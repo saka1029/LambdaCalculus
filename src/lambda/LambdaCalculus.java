@@ -96,7 +96,8 @@ public class LambdaCalculus {
                 if (line == null) break;
                 if (echo)
                     System.out.println(line);
-                line = line.replaceFirst("#.*", "");
+                line = line.replaceFirst("#.*", "").trim();
+                if (line.length() == 0) continue;
                 if (line.equalsIgnoreCase("exit")) break;
                 if (line.equalsIgnoreCase("quit")) break;
                 try {

@@ -22,12 +22,12 @@ public class Lambda implements Term, Applicable {
 
     @Override
     public Term reduce(Context context) {
+        // bodyを簡約して自分自身を新しいLambdaに置換する。
         Lambda lambda = new Lambda(name);
         try (Restorable r = context.bound.put(this, new BoundVariable(lambda))) {
-            context.enter("#", this);
             lambda.body = body.reduce(context);
-            context.exit("#", lambda);
         }
+        // η-変換可能であれば変換する。
         Term e = lambda.etaConversion();
         if (e != null) {
             context.enter("η", lambda);
@@ -40,7 +40,14 @@ public class Lambda implements Term, Applicable {
     
     @Override
     public Term apply(Term argument, Context context) {
+        // bodyがこのラムダで定義されている束縛変数を含まないのであれば、
+        // 引数の簡約を行わず、束縛自身も行わない。
+        // この2行があることで以下の再帰呼び出しが実行できるようになる。
+        // reduce("define fact (n.ifthenelse (iszero n) 1 (* n (fact (pred n))))", c);
+        if (!body.containsBoundVariable(this))
+            return body.reduce(context);
         Term result = null;
+        // 引数を簡約して束縛し、bodyを評価する。
         try (Restorable r = context.bound.put(this, argument.reduce(context))) {
             context.enter("β", this);
             return result = body.reduce(context);

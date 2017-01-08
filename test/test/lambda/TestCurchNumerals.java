@@ -73,12 +73,14 @@ public class TestCurchNumerals {
         assertEquals(normalize("false", c), normalize("iszero 2", c));
         assertEquals(normalize("1", c), normalize("ifthenelse true 1 2", c));
         assertEquals(normalize("2", c), normalize("ifthenelse false 1 2", c));
+        // 再帰呼び出しの例
+        // Lambda#applyの先頭にbodyがそのLambda自身が定義する束縛変数を含まなかったら
+        // 引数を評価せず、引数の束縛も行わないという実装をいれたら簡約できるようになった。
         reduce("define fact (n.ifthenelse (iszero n) 1 (* n (fact (pred n))))", c);
-        // stack overflow
-//        assertEquals(normalize("1", c), normalize("fact 0", c));
-//        assertEquals(normalize("1", c), normalize("fact 1", c));
-//        assertEquals(normalize("2", c), normalize("fact 2", c));
-//        assertEquals(normalize("6", c), normalize("fact 3", c));
+        assertEquals(normalize("1", c), normalize("fact 0", c));
+        assertEquals(normalize("1", c), normalize("fact 1", c));
+        assertEquals(normalize("2", c), normalize("fact 2", c));
+        assertEquals(normalize("6", c), normalize("fact 3", c));
     }
 
     @Test

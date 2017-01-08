@@ -1,14 +1,21 @@
-define 0 a.b.b
-define 1 a.b.a b
-define 2 a.b.a (a b)
-define 3 a.b.a (a (a b))
-define SUCC (n.f.x.f (n f x))
-define PLUS (m.n.f.x.m f (n f x))
-define MULT (m.n.f.m (n f))
-define MULT2 (p.q.p (PLUS q) 0)
-SUCC 0
-SUCC (SUCC 1)
-PLUS 2 3
-MULT 2 3
-MULT2
-MULT2 2 3
+define true (x.y.x)
+define false (x.y.y)
+define 0 (a.b.b)
+define 1 (a.b.a b)
+define 2 (a.b.a (a b))
+define 3 (a.b.a (a (a b)))
+define succ (n.f.x.f (n f x))
+define pred (n.f.x.n (g.h.h (g f)) (u.x) (u.u))
+define + (m.n.f.x.m f (n f x))
+define * (m.n.f.m (n f))
+define iszero (n.n (x.false) true)
+define ifthenelse (p.x.y.p x y)
+define fact (n.ifthenelse (iszero n) 1 (* n (fact (pred n))))
+succ 0
+succ (succ 1)
++ 2 3
+* 2 3
+fact 0
+fact 1
+fact 2
+fact 3
