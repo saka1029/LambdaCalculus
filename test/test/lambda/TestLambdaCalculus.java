@@ -130,15 +130,20 @@ public class TestLambdaCalculus {
     }
     
     /**
+     * Y combinator
+     * 
      * Fixed point combinators in lambda calculus
      * The Y combinator, discovered by Haskell B. Curry, is defined as:
 
      * Y=λ f.(λ x.f (x x)) (λ x.f (x x))
+     * 
      * Yコンビネータ
      * 型無しラムダ計算においてよく知られた（そしておそらく最もシンプルな）
      * 不動点コンビネータはYコンビネータと呼ばれる。
      * これはハスケル・カリーによって発見されたもので、次のように定義される。
      * Y = (λf . (λx . f (x x)) (λx . f (x x)))
+     * 
+     * !!!! 今の強欲なeduce(簡約)の実装ではStackOverflowが発生する。
      */
     @Ignore
     @Test(expected = StackOverflowError.class)

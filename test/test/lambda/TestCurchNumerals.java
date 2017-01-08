@@ -58,13 +58,27 @@ public class TestCurchNumerals {
         reduce("define + (m.n.m succ n)", c);
         reduce("define * (m.n.m (+ n) 0)", c);
         reduce("define pred (n.f.x.n (g.h.h (g f)) (u.x) (u.u))", c);
+        reduce("define true (x.y.x)", c);
+        reduce("define false (x.y.y)", c);
+        reduce("define iszero (n.n (x.false) true)", c);
+        reduce("define ifthenelse (p.x.y.p x y)", c);
         assertEquals(normalize("1", c), normalize("succ 0", c));
         assertEquals(normalize("2", c), normalize("succ 1", c));
         assertEquals(normalize("5", c), normalize("+ 2 3", c));
         assertEquals(normalize("6", c), normalize("* 2 3", c));
         assertEquals(normalize("4", c), normalize("* (+ 0 2) (+ 1 1)", c));
         assertEquals(normalize("3", c), normalize("pred 4", c));
-        System.out.println(reduce("f.x.f x", c));
+        assertEquals(normalize("0", c), normalize("pred 0", c));
+        assertEquals(normalize("true", c), normalize("iszero 0", c));
+        assertEquals(normalize("false", c), normalize("iszero 2", c));
+        assertEquals(normalize("1", c), normalize("ifthenelse true 1 2", c));
+        assertEquals(normalize("2", c), normalize("ifthenelse false 1 2", c));
+        reduce("define fact (n.ifthenelse (iszero n) 1 (* n (fact (pred n))))", c);
+        // stack overflow
+//        assertEquals(normalize("1", c), normalize("fact 0", c));
+//        assertEquals(normalize("1", c), normalize("fact 1", c));
+//        assertEquals(normalize("2", c), normalize("fact 2", c));
+//        assertEquals(normalize("6", c), normalize("fact 3", c));
     }
 
     @Test
