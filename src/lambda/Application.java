@@ -1,16 +1,47 @@
 package lambda;
 
+/**
+ * 適用のクラスです。
+ * イミュータブルなクラスです。
+ * 
+ * @author saka1029
+ */
 public class Application implements Term {
     
-    final Term head, tail;
+    /**
+     * 適用される式です。
+     */
+    final Term head;
     
+    /**
+     * 適用する式です。
+     */
+    final Term tail;
+    
+    /**
+     * コンストラクタです。
+     * 
+     * @param head 適用される式を指定します。
+     * @param tail 適用する式を指定します。
+     */
     Application(Term head, Term tail) {
-        if (head == null) throw new IllegalArgumentException("head is null");
-        if (tail == null) throw new IllegalArgumentException("tail is null");
+        if (head == null)
+            throw new IllegalArgumentException("head is null");
+        if (tail == null)
+            throw new IllegalArgumentException("tail is null");
         this.head = head;
         this.tail = tail;
     }
-    
+ 
+    /**
+     * 簡約します。
+     * headを簡約した結果が適用可能(Applicable)であれば
+     * tailを適用(apply)した結果を返します。
+     * このときtailは簡約しません。
+     * 簡約するかどうかはApplicable#applyに委ねます。
+     * そうでない場合はheadおよびtailを
+     * 簡約した結果から新たなApplicationを作成して返します。
+     */
     @Override
     public Term reduce(Context context) {
         Term function = head.reduce(context);
@@ -23,17 +54,29 @@ public class Application implements Term {
             return new Application(function, tail.reduce(context));
     }
     
+    /**
+     * 正規化します。
+     * headとtailをそれぞれ正規化した結果から
+     * 新たなApplicationを作成して返します。
+     */
     @Override
     public Term normalize(NormalizeContext context) {
         return new Application(head.normalize(context), tail.normalize(context));
     }
     
+    /**
+     * 式がラムダ式lambdaで定義される束縛変数を含むかどうかを調べます。
+     * headおよびtailのいずれかが含むかどうかを返します。
+     */
     @Override
     public boolean containsBoundVariable(Lambda lambda) {
         return head.containsBoundVariable(lambda)
             || tail.containsBoundVariable(lambda);
     }
     
+    /**
+     * headおよびtailがともに等しい時にtrueを返します。
+     */
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Application))
@@ -43,20 +86,9 @@ public class Application implements Term {
     }
     
     /**
-     * Lambdaの場合
-     * Variable -> x.V -> x.V
-     * Application -> x.U V
-     * Lambda -> x.y.X
-     * 
-     * Applicationの場合
-     * head =
-     * Variable -> V T
-     * Application -> A X T
-     * Lambda -> x.B T
-     * tail =
-     * Variable -> H V
-     * Application -> H (A X)
-     * Lambda -> H x.B
+     * headとtailの文字列表現をスペースで区切って出力します。
+     * headがLambdaクラスの場合はheadを括弧で囲んで出力します。
+     * tailがApplicationクラスの場合はtailを括弧で囲んで出力します。
      */
     @Override
     public String toString() {

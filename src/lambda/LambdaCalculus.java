@@ -7,27 +7,85 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
+/**
+ * ラムダ計算のヘルパークラスです。
+ * 
+ * @author saka1029
+ *
+ */
 public class LambdaCalculus {
 
+    /**
+     * ラムダ式の文字列表現としてドット形式を使用するかどうかを保持します。
+     * trueの場合はドット形式（{@code x.y.x}）、
+     * falseの場合はラムダ形式（{@code λx y.x}）となります。
+     * デフォルトはラムダ形式です。
+     */
     public static boolean TO_STRING_DOT = false;
+    
+    /**
+     * trueの場合トレース出力をします。
+     * デフォルトはfalseです。
+     */
     public static boolean TRACE = false;
+    
+    /**
+     * ONを表す変数です。
+     */
     public static UnboundVariable ON = UnboundVariable.of("on");
+   
+    /**
+     * OFFを表す変数です。
+     */
     public static UnboundVariable OFF = UnboundVariable.of("off");
     
+    /**
+     * コンストラクタです。
+     * このクラスのインスタンスを作成することはできません。
+     */
     private LambdaCalculus() {}
     
+    /**
+     * 文字列を式に変換します。
+     * 
+     * @param source 式に変換する文字列を指定します。
+     * @return 式を返します。
+     */
     public static Term term(String source) {
         return Parser.parse(source);
     }
     
+    /**
+     * 文字列を式に変換後簡約します。
+     * 
+     * @param source 式に変換する文字列を指定します。
+     * @param context 式を簡約するためのコンテキストを指定します。
+     * @return 簡約後の式を返します。
+     */
     public static Term reduce(String source, Context context) {
         return term(source).reduce(context);
     }
     
+    /**
+     * 文字列を式に変換後簡約し、さらに正規化します。
+     * 
+     * @param source 式に変換する文字列を指定します。
+     * @param context 式を簡約するためのコンテキストを指定します。
+     * @return 正規化後の式を返します。
+     */
     public static Term normalize(String source, Context context) {
         return reduce(source, context).normalize();
     }
     
+    /**
+     * コンテキストに組み込み関数を定義します。
+     * 
+     * @param context 定義を追加するコンテキストを指定します。
+     * @param name 組み込み関数の名前を指定します。
+     *             これは{@link UnboundVariable}の名前になります。
+     *             組み込み関数自身の文字列表現は{@code "$$$" + name}となります。
+     * @param body 組み込み関数の定義を指定します。
+     */
     static void define(Context context, String name, Primitive body) {
         context.define(UnboundVariable.of(name),
             new Primitive() {
@@ -45,6 +103,9 @@ public class LambdaCalculus {
             });
     }
 
+    /**
+     * 組み込み関数を含むコンテキストを返します。
+     */
     public static Context defaultContext() {
         Context c = new Context();
         define(c, "define", (arg0, context0) ->
@@ -62,13 +123,21 @@ public class LambdaCalculus {
     }
     
     /**
-     * Command line processor
+     * コマンドラインプロセッサを実行します。
      * 
-     * [usage]
-     * java lambda.LambdaCalculus [-e] [-t] [-d] [FILENAME]
+     * {@code java lambda.LambdaCalculus [-e] [-t] [-d] [FILENAME]}
      * 
-     * @param args
-     * @throws IOException
+     * コマンドラインオプションの指定は以下のとおりです。
+     * -e : 入力文字列をエコー出力します。
+     * -t : トレース出力します。
+     * -d : ラムダ式をドット形式で出力します。（指定しない場合はラムダ形式です）
+     * FILENAME : 処理対象のファイルを指定します。
+     *            省略した場合は標準入力から読み込みます。
+     * 
+     * 式を入力すると簡約した結果を出力します。
+     * 
+     * @param args コマンドラインオプションを指定します。
+     * @throws IOException 入出力エラーが発生したときにスローします。
      */
     public static void main(String[] args) throws IOException {
         Context c = defaultContext();
