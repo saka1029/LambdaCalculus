@@ -2,7 +2,6 @@ package test.lambda;
 
 import static org.junit.Assert.*;
 
-import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;

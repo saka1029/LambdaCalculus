@@ -5,7 +5,6 @@ import static lambda.LambdaCalculus.*;
 
 import org.junit.Test;
 
-import lambda.Context;
 import lambda.UnboundVariable;
 
 public class TestParser {
