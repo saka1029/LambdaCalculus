@@ -9,10 +9,9 @@ import java.util.HashMap;
  *
  */
 public class ParseContext extends BindMap<String, Lambda> {
-    
+
     /**
-     * コンストラクタです。
-     * ベースとなるマップとしてHashMapを使います。
+     * コンストラクタです。 ベースとなるマップとしてHashMapを使います。
      */
     ParseContext() {
         super(new HashMap<>());

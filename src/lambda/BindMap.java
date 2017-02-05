@@ -5,22 +5,24 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * {@link java.util.Map} * のラッパークラスです。
- * 変数束縛の環境を表現するために使用します。
+ * {@link java.util.Map} * のラッパークラスです。 変数束縛の環境を表現するために使用します。
  * 
  * @author saka1029
- * @param <K> マップのキーとなる型です。
- * @param <V> マップの値となる型です。
+ * @param <K>
+ *            マップのキーとなる型です。
+ * @param <V>
+ *            マップの値となる型です。
  */
 public class BindMap<K, V> {
-    
+
     /**
      * ベースとなるマップです。
      */
     private final Map<K, V> map;
-    
+
     /**
      * コンストラクタです。
+     * 
      * @param map ベースとなるマップを指定します。
      */
     protected BindMap(Map<K, V> map) {
@@ -29,6 +31,7 @@ public class BindMap<K, V> {
 
     /**
      * マップのサイズを返します。
+     * 
      * @return マップのサイズを返します。
      */
     public int size() {
@@ -36,30 +39,26 @@ public class BindMap<K, V> {
     }
 
     /**
-     * キーkeyに関連付けられた値を返します。
-     * 値が存在しない場合はnullを返します。
+     * キーkeyに関連付けられた値を返します。 値が存在しない場合はnullを返します。
      * 
      * @param key キーを指定します。
-     * @return 対応する値を返します。
-     *         値が存在しない場合はnullを返します。
+     * @return 対応する値を返します。 値が存在しない場合はnullを返します。
      */
     public V get(K key) {
         return map.get(key);
     }
-    
+
     /**
-     * キーkeyに関連付けられた値を返します。
-     * 値が存在しない場合はdefaultValueを返します。
+     * キーkeyに関連付けられた値を返します。 値が存在しない場合はdefaultValueを返します。
      * 
      * @param key キーを指定します。
      * @param defaultValue 対応する値がない場合に返す値を指定します。
-     * @return 対応する値を返します。
-     *         値が存在しない場合はdefaultValueを返します。
+     * @return 対応する値を返します。 値が存在しない場合はdefaultValueを返します。
      */
     public V getOrDefault(K key, V defaultValue) {
         return map.getOrDefault(key, defaultValue);
     }
-    
+
     /**
      * keyとvalueの対を追加します。
      * 
@@ -73,10 +72,17 @@ public class BindMap<K, V> {
     }
     
     /**
-     * keyとvalueの対を追加します。
-     * 追加前の状態に戻すための{@link Restorable} を返します。
-     * 返された値の{@code close()}を実行すると
-     * 追加前の状態に戻ります。
+     * keyを削除します。
+     * 
+     * @param key 削除するキーを指定します。
+     */
+    public void undefine(K key) {
+        map.remove(key);
+    }
+
+    /**
+     * keyとvalueの対を追加します。 追加前の状態に戻すための{@link Restorable} を返します。
+     * 返された値の{@code close()}を実行すると 追加前の状態に戻ります。
      * 
      * @param key キーを指定します。
      * @param value キーに関連付けられる値を指定します。
@@ -85,9 +91,7 @@ public class BindMap<K, V> {
     public Restorable put(K key, V value) {
         V old = map.get(key);
         map.put(key, value);
-        return old != null ?
-            () -> map.put(key, old) :
-            () -> map.remove(key);
+        return old != null ? () -> map.put(key, old) : () -> map.remove(key);
     }
 
     /**
@@ -98,10 +102,9 @@ public class BindMap<K, V> {
     public Set<Entry<K, V>> entrySet() {
         return map.entrySet();
     }
-    
+
     /**
-     * 文字列表現を返します。
-     * 単にベースとなるマップの文字列表現を返します。
+     * 文字列表現を返します。 単にベースとなるマップの文字列表現を返します。
      */
     @Override
     public String toString() {

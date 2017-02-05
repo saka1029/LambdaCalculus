@@ -16,45 +16,43 @@ import java.io.Reader;
 public class LambdaCalculus {
 
     /**
-     * ラムダ式の文字列表現としてドット形式を使用するかどうかを保持します。
-     * trueの場合はドット形式（{@code x.y.x}）、
-     * falseの場合はラムダ形式（{@code λx y.x}）となります。
-     * デフォルトはラムダ形式です。
+     * ラムダ式の文字列表現としてドット形式を使用するかどうかを保持します。 trueの場合はドット形式（{@code x.y.x}）、
+     * falseの場合はラムダ形式（{@code λx y.x}）となります。 デフォルトはラムダ形式です。
      */
     public static boolean TO_STRING_DOT = false;
-    
+
     /**
-     * trueの場合トレース出力をします。
-     * デフォルトはfalseです。
+     * trueの場合トレース出力をします。 デフォルトはfalseです。
      */
     public static boolean TRACE = false;
-    
+
     /**
      * ONを表す変数です。
      */
     public static UnboundVariable ON = UnboundVariable.of("on");
-   
+
     /**
      * OFFを表す変数です。
      */
     public static UnboundVariable OFF = UnboundVariable.of("off");
-    
+
     /**
-     * コンストラクタです。
-     * このクラスのインスタンスを作成することはできません。
+     * コンストラクタです。 このクラスのインスタンスを作成することはできません。
      */
-    private LambdaCalculus() {}
-    
+    private LambdaCalculus() {
+    }
+
     /**
      * 文字列を式に変換します。
      * 
-     * @param source 式に変換する文字列を指定します。
+     * @param source
+     *            式に変換する文字列を指定します。
      * @return 式を返します。
      */
     public static Term term(String source) {
         return Parser.parse(source);
     }
-    
+
     /**
      * 文字列を式に変換後簡約します。
      * 
@@ -65,7 +63,7 @@ public class LambdaCalculus {
     public static Term reduce(String source, Context context) {
         return term(source).reduce(context);
     }
-    
+
     /**
      * 文字列を式に変換後簡約し、さらに正規化します。
      * 
@@ -76,14 +74,13 @@ public class LambdaCalculus {
     public static Term normalize(String source, Context context) {
         return reduce(source, context).normalize();
     }
-    
+
     /**
      * コンテキストに組み込み関数を定義します。
      * 
      * @param context 定義を追加するコンテキストを指定します。
-     * @param name 組み込み関数の名前を指定します。
-     *             これは{@link UnboundVariable}の名前になります。
-     *             組み込み関数自身の文字列表現は{@code "$$$" + name}となります。
+     * @param name 組み込み関数の名前を指定します。 これは{@link UnboundVariable}の名前になります。
+     *            組み込み関数自身の文字列表現は{@code "$$$" + name}となります。
      * @param body 組み込み関数の定義を指定します。
      */
     static void define(Context context, String name, Primitive body) {
@@ -94,12 +91,12 @@ public class LambdaCalculus {
                 public Term apply(Term argument, Context context) {
                     return body.apply(argument, context);
                 }
-                
+
                 @Override
                 public String toString() {
                     return "$$$" + name;
                 }
-            
+
             });
     }
 
@@ -110,7 +107,11 @@ public class LambdaCalculus {
         Context c = new Context();
         define(c, "define", (arg0, context0) ->
             (Primitive) (arg1, context1) ->
-                context1.define((UnboundVariable)arg0, arg1.reduce(context1)));
+                context1.define((UnboundVariable) arg0, arg1.reduce(context1)));
+        define(c, "undefine", (arg, context) -> {
+            context.undefine((UnboundVariable)arg);
+            return arg;
+        });
         define(c, "trace", (arg, context) -> {
             TRACE = !arg.equals(OFF);
             return arg;
@@ -121,18 +122,15 @@ public class LambdaCalculus {
         });
         return c;
     }
-    
+
     /**
      * コマンドラインプロセッサを実行します。
-     * 
+     * <pre><code>
      * {@code java lambda.LambdaCalculus [-e] [-t] [-d] [FILENAME]}
-     * 
-     * コマンドラインオプションの指定は以下のとおりです。
-     * -e : 入力文字列をエコー出力します。
-     * -t : トレース出力します。
-     * -d : ラムダ式をドット形式で出力します。（指定しない場合はラムダ形式です）
-     * FILENAME : 処理対象のファイルを指定します。
-     *            省略した場合は標準入力から読み込みます。
+     * </code></pre>
+     * コマンドラインオプションの指定は以下のとおりです。 -e : 入力文字列をエコー出力します。 -t : トレース出力します。 -d :
+     * ラムダ式をドット形式で出力します。（指定しない場合はラムダ形式です） FILENAME : 処理対象のファイルを指定します。
+     * 省略した場合は標準入力から読み込みます。
      * 
      * 式を入力すると簡約した結果を出力します。
      * 
@@ -152,25 +150,22 @@ public class LambdaCalculus {
             case "-d": LambdaCalculus.TO_STRING_DOT = true; break;
             default: break L;
             }
-        if (i < args.length)
-            in = new FileInputStream(args[i]);
+        if (i < args.length) in = new FileInputStream(args[i]);
         boolean isConsole = System.console() != null && in == System.in;
         try (InputStream is = in;
             Reader r = new InputStreamReader(is);
             BufferedReader reader = new BufferedReader(r)) {
             while (true) {
-                if (isConsole || echo)
-                    System.out.print(prompt);
+                if (isConsole || echo) System.out.print(prompt);
                 String line = reader.readLine();
                 if (line == null) break;
-                if (echo)
-                    System.out.println(line);
+                if (echo) System.out.println(line);
                 line = line.replaceFirst("#.*", "").trim();
                 if (line.length() == 0) continue;
                 if (line.equalsIgnoreCase("exit")) break;
                 if (line.equalsIgnoreCase("quit")) break;
                 try {
-                    Term term = reduce(line, c);
+                    Term term = normalize(line, c);
                     System.out.println(term);
                 } catch (RuntimeException e) {
                     System.err.println(e.getMessage());
@@ -178,5 +173,5 @@ public class LambdaCalculus {
             }
         }
     }
-    
+
 }

@@ -8,7 +8,7 @@ import java.util.IdentityHashMap;
  * @author saka1029
  */
 public class NormalizeContext extends BindMap<Lambda, BoundVariable> {
-    
+
     /**
      * コンストラクタです。
      */
