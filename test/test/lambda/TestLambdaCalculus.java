@@ -15,6 +15,10 @@ public class TestLambdaCalculus {
         assertEquals(normalize(expected, c), normalize(actual, c));
     }
 
+    static void notEqualsNormalized(String expected, String actual, Context c) {
+        assertNotEquals(normalize(expected, c), normalize(actual, c));
+    }
+
     @Test
     public void testContext() {
         Context c = defaultContext();
@@ -25,6 +29,16 @@ public class TestLambdaCalculus {
         equalsNormalized("true", "ident true", c);
         assertEquals("$$$define", reduce("define", c).toString());
         System.out.println(c);
+    }
+
+    @Test
+    public void testUndefine() {
+        Context c = defaultContext();
+        reduce("define true (x.y.x)", c);
+        equalsNormalized("x.y.x", "true", c);
+        reduce("undefine true", c);
+        equalsNormalized("true", "true", c);
+        notEqualsNormalized("x.y.x", "true", c);
     }
     
     @Test

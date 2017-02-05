@@ -28,11 +28,28 @@ public class TestParser {
     }
     
     @Test
+    public void testInvalidFreevariable() {
+        try {
+            assertEquals(term("$1"), term("$1"));
+            fail();
+        } catch (RuntimeException e) {
+            assertEquals("Free variable must not start with '$'", e.getMessage());
+        }
+        try {
+            assertEquals(term("$1.$1 $2"), term("$1.$1 $2"));
+            fail();
+        } catch (RuntimeException e) {
+            assertEquals("Free variable must not start with '$'", e.getMessage());
+        }
+    }
+    
+    @Test
     public void testLambda() {
         assertEquals(term("x.x"), term("λx.x"));
         assertEquals(term("x.x"), term("\\x.x"));
         assertEquals(term("x.y.x"), term("λx y.x"));
         assertEquals(term("x.y.y"), term("λx y.y"));
+        assertEquals(term("$0.$0"), term("λ$0.$0"));
     }
     
     @Test
