@@ -1,13 +1,18 @@
 package test.lambda;
 
-import static org.junit.Assert.*;
+import static lambda.LambdaCalculus.TO_STRING_DOT;
+import static lambda.LambdaCalculus.TRACE;
+import static lambda.LambdaCalculus.defaultContext;
+import static lambda.LambdaCalculus.normalize;
+import static lambda.LambdaCalculus.reduce;
+import static lambda.LambdaCalculus.term;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 import lambda.Context;
-
-import static lambda.LambdaCalculus.*;
 
 public class TestLambdaCalculus {
 
@@ -40,7 +45,7 @@ public class TestLambdaCalculus {
         equalsNormalized("true", "true", c);
         notEqualsNormalized("x.y.x", "true", c);
     }
-    
+
     @Test
     public void testBuiltin() {
         Context c = defaultContext();
@@ -55,7 +60,7 @@ public class TestLambdaCalculus {
         reduce("dot off", c);
         assertEquals(false, TO_STRING_DOT);
     }
-    
+
     @Test
     public void testAlphaConversion() {
         Context c = defaultContext();
@@ -77,7 +82,7 @@ public class TestLambdaCalculus {
         equalsNormalized("x.x x.y.x", "x.x true", c);
         equalsNormalized("K true", "(x.x true) K", c);
     }
-        
+
     /**
      * η-renameが必要となる場合 from Wikipedia
      */
@@ -94,7 +99,7 @@ public class TestLambdaCalculus {
         //  = z.z x.y
         // 最後のyが自由変数であることがわかる。
     }
-    
+
     @Test
     public void testParen() {
         Context c = defaultContext();
@@ -102,7 +107,7 @@ public class TestLambdaCalculus {
         System.out.println(reduce("z.true z", c));
         System.out.println(term("x.(x.y.x) x"));
     }
-    
+
     /**
      * <b>Sample Interpretations</b><br>
      * Below are some lambda calculus interpretation test cases:
@@ -142,21 +147,21 @@ public class TestLambdaCalculus {
         // This implementation does not require α-renaming
         equalsNormalized("y w", "(y.((x.y.x y) y)) (y w)", c);
     }
-    
+
     /**
      * Y combinator
-     * 
+     *
      * Fixed point combinators in lambda calculus
      * The Y combinator, discovered by Haskell B. Curry, is defined as:
 
      * Y=λ f.(λ x.f (x x)) (λ x.f (x x))
-     * 
+     *
      * Yコンビネータ
      * 型無しラムダ計算においてよく知られた（そしておそらく最もシンプルな）
      * 不動点コンビネータはYコンビネータと呼ばれる。
      * これはハスケル・カリーによって発見されたもので、次のように定義される。
      * Y = (λf . (λx . f (x x)) (λx . f (x x)))
-     * 
+     *
      * !!!! 今の強欲なeduce(簡約)の実装ではStackOverflowが発生する。
      */
     @Ignore
@@ -164,7 +169,7 @@ public class TestLambdaCalculus {
     public void testYCombinator() {
         // Y=λ f.(λ x.f (x x)) (λ x.f (x x))
         Context c = defaultContext();
-        reduce("define Y λ f.(λ x.f (x x)) (λ x.f (x x))", c);
+        reduce("define Y (λ f.(λ x.f (x x)) (λ x.f (x x)))", c);
         assertEquals(normalize("g (Y g)", c), normalize("Y g", c));
     }
 }

@@ -1,9 +1,8 @@
 package lambda;
 
 /**
- * カリー化された単一の束縛変数を持つラムダ式です。 基本的にイミュータブルなクラスです。
- * 
- * @author saka1029
+ * カリー化された単一の束縛変数を持つラムダ式です。
+ * 基本的にイミュータブルなクラスです。
  */
 public class Lambda implements Term, Applicable {
 
@@ -18,17 +17,16 @@ public class Lambda implements Term, Applicable {
     private Term body;
 
     /**
-     * bodyが自分自身の束縛変数を含んでいるかどうかを保持します。 falseの場合はapplyする時に引数の評価および束縛を省略できます。
+     * bodyが自分自身の束縛変数を含んでいるかどうかを保持します。
+     * falseの場合はapplyする時に引数の評価および束縛を省略できます。
      */
     private boolean containsBoundVariable;
 
     /**
      * コンストラクタ。
-     * 
-     * @param name
-     *            束縛変数の名前を指定します。
-     * @throws IllegalArgumentException
-     *             引数nameがnullです。
+     *
+     * @param name 束縛変数の名前を指定します。
+     * @throws IllegalArgumentException 引数nameがnullのときスローします。
      */
     Lambda(String name) {
         if (name == null)
@@ -37,15 +35,13 @@ public class Lambda implements Term, Applicable {
     }
 
     /**
-     * bodyの値を設定します。 コンストラクタを呼び出した後、一回だけ呼び出すことができます。
+     * bodyの値を設定します。
+     * コンストラクタを呼び出した後、一回だけ呼び出すことができます。
      * 二回以上呼び出すとIllegalStateExceptionをスローします。
-     * 
-     * @param body
-     *            bodyに設定する値を指定します。
-     * @throws IllegalArgumentException
-     *             引数bodyがnullです。
-     * @throws IllegalStateException
-     *             このメソッドが二回以上呼び出されています。
+     *
+     * @param body bodyに設定する値を指定します。
+     * @throws IllegalArgumentException 引数bodyがnullです。
+     * @throws IllegalStateException このメソッドが二回以上呼び出されたときにスローします。
      */
     void setBody(Term body) {
         if (body == null)
@@ -57,9 +53,12 @@ public class Lambda implements Term, Applicable {
     }
 
     /**
-     * η-変換可能な場合はη-変換後の式を返します。 変換可能でない場合はnullを返します。 η-変換はラムダ式が{@code λx.E x}の形式で
-     * {@code E}が変数{@code x}を含まない場合 {@code E}に変換します。
-     * 
+     * η-変換可能な場合はη-変換後の式を返します。
+     * 変換可能でない場合はnullを返します。
+     * η-変換はラムダ式が{@code λx.E x}の形式で
+     * {@code E}が変数{@code x}を含まない場合
+     * {@code E}に変換します。
+     *
      * @return η変換後の式を返します。変換できない場合はnullを返します。
      */
     private Term etaConversion() {
@@ -77,7 +76,9 @@ public class Lambda implements Term, Applicable {
     }
 
     /**
-     * 簡約します。 最初にbodyを簡約して新しいラムダ式を作成します。 次に、η-変換可能であればその結果を返します。
+     * 簡約します。
+     * 最初にbodyを簡約して新しいラムダ式を作成します。
+     * 次に、η-変換可能であればその結果を返します。
      */
     @Override
     public Term reduce(Context context) {
@@ -86,7 +87,7 @@ public class Lambda implements Term, Applicable {
         try (Restorable r = context.bound.put(this, new BoundVariable(lambda))) {
             lambda.setBody(body.reduce(context));
         }
-        // η-変換可能であれば変換する。
+        // η-変換可能であれば変換します。
         Term e = lambda.etaConversion();
         if (e == null)
             return lambda;
@@ -97,16 +98,18 @@ public class Lambda implements Term, Applicable {
     }
 
     /**
-     * 引数argumentを関数適用します。 bodyがこのラムダ式の束縛変数を含まない場合は 引数を簡約せず引数の束縛も行わずに、
-     * 単にbodyを簡約した結果を返します。 それ以外の場合は引数を簡約して変数束縛後にbodyを簡約します。
+     * 引数argumentを関数適用します。
+     * bodyがこのラムダ式の束縛変数を含まない場合は
+     * 引数を簡約せず引数の束縛も行わずに、
+     * 単にbodyを簡約した結果を返します。
+     * それ以外の場合は引数を簡約して変数束縛後にbodyを簡約します。
      */
     @Override
     public Term apply(Term argument, Context context) {
         // bodyがこのラムダで定義されている束縛変数を含まないのであれば、
         // 引数の簡約を行わず、束縛自身も行いません。
-        // この2行があることで以下の再帰呼び出しが実行できるようになります。
-        // reduce("define fact (n.ifthenelse (iszero n) 1 (* n (fact (pred
-        // n))))", c);
+        // これがあることで以下の再帰呼び出しが実行できるようになります。
+        // reduce("define fact (n.ifthenelse (iszero n) 1 (* n (fact (pred n))))", c);
         if (!containsBoundVariable) {
             context.enter("β", this);
             Term result = body.reduce(context);
@@ -114,7 +117,7 @@ public class Lambda implements Term, Applicable {
             return result;
         }
         Term result = null;
-        // 引数を簡約して束縛し、bodyを評価する。
+        // 引数を簡約して束縛し、bodyを評価します。
         try (Restorable r = context.bound.put(this, argument.reduce(context))) {
             context.enter("β", this);
             return result = body.reduce(context);
@@ -124,8 +127,9 @@ public class Lambda implements Term, Applicable {
     }
 
     /**
-     * 束縛変数の名前を {@code "$0", "$1", "$2", ...} に置換したラムダ式を返します。 例えば
-     * {@code λx.λy.x} の場合、 {@code λ$0.λ$1.$0} を返します。
+     * 束縛変数の名前を {@code "$0", "$1", "$2", ...} に置換したラムダ式を返します。
+     * 例えば * {@code λx.λy.x} の場合、
+     * {@code λ$0.λ$1.$0} を返します。
      */
     @Override
     public Term normalize(NormalizeContext context) {
@@ -185,8 +189,8 @@ public class Lambda implements Term, Applicable {
 
     /**
      * 文字列表現を返します。 例えばラムダ式 {@code λx.λy.x} に対して
-     * {@code LambdaCalculus.TO_STRING_DOT} がtrueの時は {@code "x.y.x"}を、 falseの時は
-     * {@code "λx y.x"}を返します。
+     * {@code LambdaCalculus.TO_STRING_DOT} がtrueの時は {@code "x.y.x"}を、
+     * falseの時は{@code "λx y.x"}を返します。
      */
     @Override
     public String toString() {
