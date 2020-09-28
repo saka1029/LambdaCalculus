@@ -9,7 +9,6 @@ import static lambda.LambdaCalculus.term;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import lambda.Context;
@@ -146,30 +145,5 @@ public class TestLambdaCalculus {
         // (\y.(\x.\y.(x y) y) (y w))  ->  (y w)   * Alpha renaming, beta reduction and eta reduction all * involved
         // This implementation does not require α-renaming
         equalsNormalized("y w", "(y.((x.y.x y) y)) (y w)", c);
-    }
-
-    /**
-     * Y combinator
-     *
-     * Fixed point combinators in lambda calculus
-     * The Y combinator, discovered by Haskell B. Curry, is defined as:
-
-     * Y=λ f.(λ x.f (x x)) (λ x.f (x x))
-     *
-     * Yコンビネータ
-     * 型無しラムダ計算においてよく知られた（そしておそらく最もシンプルな）
-     * 不動点コンビネータはYコンビネータと呼ばれる。
-     * これはハスケル・カリーによって発見されたもので、次のように定義される。
-     * Y = (λf . (λx . f (x x)) (λx . f (x x)))
-     *
-     * !!!! 今の強欲なeduce(簡約)の実装ではStackOverflowが発生する。
-     */
-    @Ignore
-    @Test(expected = StackOverflowError.class)
-    public void testYCombinator() {
-        // Y=λ f.(λ x.f (x x)) (λ x.f (x x))
-        Context c = defaultContext();
-        reduce("define Y (λ f.(λ x.f (x x)) (λ x.f (x x)))", c);
-        assertEquals(normalize("g (Y g)", c), normalize("Y g", c));
     }
 }
