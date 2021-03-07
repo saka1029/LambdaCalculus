@@ -1,180 +1,113 @@
 package lambda;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-
-/**
- * ラムダ計算のヘルパークラスです。
- *
- * @author saka1029
- *
- */
 public class LambdaCalculus {
 
-    /**
-     * ラムダ式の文字列表現としてドット形式を使用するかどうかを保持します。 trueの場合はドット形式（{@code x.y.x}）、
-     * falseの場合はラムダ形式（{@code λx y.x}）となります。 デフォルトはラムダ形式です。
-     */
-    public static boolean TO_STRING_DOT = false;
-
-    /**
-     * trueの場合トレース出力をします。 デフォルトはfalseです。
-     */
-    public static boolean TRACE = false;
-
-    /**
-     * ONを表す変数です。
-     */
-    public static UnboundVariable ON = UnboundVariable.of("on");
-
-    /**
-     * OFFを表す変数です。
-     */
-    public static UnboundVariable OFF = UnboundVariable.of("off");
-
-    /**
-     * コンストラクタです。 このクラスのインスタンスを作成することはできません。
-     */
     private LambdaCalculus() {
     }
 
-    /**
-     * 文字列を式に変換します。
-     *
-     * @param source
-     *            式に変換する文字列を指定します。
-     * @return 式を返します。
-     */
-    public static Term term(String source) {
-        return Parser.parse(source);
-    }
+    public static Expression parse(String source) {
+        return new Object() {
 
-    /**
-     * 文字列を式に変換後簡約します。
-     *
-     * @param source 式に変換する文字列を指定します。
-     * @param context 式を簡約するためのコンテキストを指定します。
-     * @return 簡約後の式を返します。
-     */
-    public static Term reduce(String source, Context context) {
-        return term(source).reduce(context);
-    }
+            int[] codePoints = source.codePoints().toArray();
+            int length = codePoints.length;
+            int index = 0;
+            int ch = ' ';
 
-    /**
-     * 文字列を式に変換後簡約し、さらに正規化します。
-     *
-     * @param source 式に変換する文字列を指定します。
-     * @param context 式を簡約するためのコンテキストを指定します。
-     * @return 正規化後の式を返します。
-     */
-    public static Term normalize(String source, Context context) {
-        return reduce(source, context).normalize();
-    }
-
-    /**
-     * コンテキストに組み込み関数を定義します。
-     *
-     * @param context 定義を追加するコンテキストを指定します。
-     * @param name 組み込み関数の名前を指定します。 これは{@link UnboundVariable}の名前になります。
-     *            組み込み関数自身の文字列表現は{@code "$$$" + name}となります。
-     * @param body 組み込み関数の定義を指定します。
-     */
-    static void define(Context context, String name, Primitive body) {
-        context.define(UnboundVariable.of(name),
-            new Primitive() {
-
-                @Override
-                public Term apply(Term argument, Context context) {
-                    return body.apply(argument, context);
-                }
-
-                @Override
-                public String toString() {
-                    return "$$$" + name;
-                }
-
-            });
-    }
-
-    /**
-     * 組み込み関数を含むコンテキストを返します。
-     */
-    public static Context defaultContext() {
-        Context c = new Context();
-        define(c, "define", (arg0, context0) ->
-            (Primitive) (arg1, context1) ->
-                context1.define((UnboundVariable) arg0, arg1.reduce(context1)));
-        define(c, "undefine", (arg, context) -> {
-            context.undefine((UnboundVariable)arg);
-            return arg;
-        });
-        define(c, "trace", (arg, context) -> {
-            TRACE = !arg.equals(OFF);
-            return arg;
-        });
-        define(c, "dot", (arg, context) -> {
-            TO_STRING_DOT = !arg.equals(OFF);
-            return arg;
-        });
-        return c;
-    }
-
-    /**
-     * コマンドラインプロセッサを実行します。
-     * <pre><code>
-     * {@code java lambda.LambdaCalculus [-e] [-t] [-d] [FILENAME]}
-     * </code></pre>
-     * コマンドラインオプションの指定は以下のとおりです。
-     * -e : 入力文字列をエコー出力します。
-     * -t : トレース出力します。
-     * -d : * ラムダ式をドット形式で出力します。
-     * （指定しない場合はラムダ形式です） FILENAME : 処理対象のファイルを指定します。
-     * 省略した場合は標準入力から読み込みます。
-     *
-     * 式を入力すると簡約した結果を出力します。
-     *
-     * @param args コマンドラインオプションを指定します。
-     * @throws IOException 入出力エラーが発生したときにスローします。
-     */
-    public static void main(String[] args) throws IOException {
-        Context c = defaultContext();
-        InputStream in = System.in;
-        boolean echo = false;
-        String prompt = "% ";
-        int i;
-        L: for (i = 0; i < args.length; ++i)
-            switch (args[i]) {
-            case "-e": echo = true; break;
-            case "-t": LambdaCalculus.TRACE = true; break;
-            case "-d": LambdaCalculus.TO_STRING_DOT = true; break;
-            default: break L;
-            }
-        if (i < args.length) in = new FileInputStream(args[i]);
-        boolean isConsole = System.console() != null && in == System.in;
-        try (InputStream is = in;
-            Reader r = new InputStreamReader(is);
-            BufferedReader reader = new BufferedReader(r)) {
-            while (true) {
-                if (isConsole || echo) System.out.print(prompt);
-                String line = reader.readLine();
-                if (line == null) break;
-                if (echo) System.out.println(line);
-                line = line.replaceFirst("#.*", "").trim();
-                if (line.length() == 0) continue;
-                if (line.equalsIgnoreCase("exit")) break;
-                if (line.equalsIgnoreCase("quit")) break;
-                try {
-                    Term term = normalize(line, c);
-                    System.out.println(term);
-                } catch (RuntimeException e) {
-                    System.err.println(e.getMessage());
+            boolean isVariableChar(int ch) {
+                switch (ch) {
+                case -1: case 'λ': case '(': case ')': case '.':
+                    return false;
+                default:
+                    return !Character.isWhitespace(ch);
                 }
             }
-        }
-    }
 
+            int next() {
+                return ch = index < length ? codePoints[index++] : -1;
+            }
+
+            void skipSpaces() {
+                while (Character.isWhitespace(ch))
+                    next();
+            }
+
+            Lambda parseLambda(Bind<String, BoundVariable> bind) {
+                skipSpaces();
+                if (!isVariableChar(ch))
+                    throw new RuntimeException("variable expected");
+                String name = parseVariableName();
+                skipSpaces();
+                BoundVariable variable = new BoundVariable(name);
+                Bind<String, BoundVariable> newBind = Bind.bind(bind, name, variable);
+                Expression body;
+                if (ch == '.') {
+                    next(); // skip '.'
+                    body = parse(newBind);
+                } else
+                    body = parseLambda(newBind);
+                return new Lambda(variable, body);
+            }
+
+            Expression parseParen(Bind<String, BoundVariable> bind) {
+                skipSpaces();
+                Expression e = parse(bind);
+                skipSpaces();
+                if (ch != ')')
+                    throw new RuntimeException("')' expected");
+                next(); // skip ')'
+                return e;
+            }
+
+            String parseVariableName() {
+                StringBuilder sb = new StringBuilder();
+                for ( ; isVariableChar(ch); next())
+                    sb.appendCodePoint(ch);
+                return sb.toString();
+            }
+
+            Variable parseVariable(Bind<String, BoundVariable> bind) {
+                String name = parseVariableName();
+                BoundVariable variable = Bind.get(bind, name);
+                return variable != null ? variable : FreeVariable.of(name);
+            }
+
+            Expression parseTerm(Bind<String, BoundVariable> bind) {
+                skipSpaces();
+                switch (ch) {
+                case -1:
+                    throw new RuntimeException("unexpected end of string");
+                case 'λ':
+                    next();  // skip 'λ'
+                    return parseLambda(bind);
+                case '(':
+                    next(); // skip '('
+                    return parseParen(bind);
+                default:
+                    if (!isVariableChar(ch))
+                        throw new RuntimeException(new StringBuilder("unexpected char '")
+                            .appendCodePoint(ch).append("'").toString());
+                    return parseVariable(bind);
+                }
+            }
+
+            Expression parse(Bind<String, BoundVariable> bind) {
+                Expression term = parseTerm(bind);
+                while (true) {
+                    skipSpaces();
+                    if (ch != 'λ' && ch != '(' && !isVariableChar(ch))
+                        break;
+                    term = new Application(term, parseTerm(bind));
+                }
+                return term;
+            }
+
+            Expression parse() {
+                Expression expression = parse(null);
+                if (ch != -1)
+                    throw new RuntimeException("extra string '"
+                        + new String(codePoints, index - 1, length - index + 1) + "'");
+                return expression;
+            }
+        }.parse();
+    }
 }
