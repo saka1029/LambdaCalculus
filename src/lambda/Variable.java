@@ -1,10 +1,15 @@
 package lambda;
 
-/**
- * 変数のクラスです。
- * 
- * @author saka1029
- */
-interface Variable extends Term {
+public abstract class Variable extends Expression {
 
+    public final String name;
+
+    protected Variable(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
