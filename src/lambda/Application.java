@@ -53,6 +53,9 @@ public class Application extends Expression {
         if (newFunction instanceof Lambda) {
             Lambda lambda = (Lambda) newFunction;
             return lambda.body.reduce(Bind.bind(bind, lambda.variable, newArgument), context);
+        } else if (newFunction instanceof Command) {
+            Command command = (Command) newFunction;
+            return command.reduce(bind, context, newArgument);
         }
         return new Application(newFunction, newArgument);
     }

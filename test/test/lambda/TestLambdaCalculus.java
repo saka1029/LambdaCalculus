@@ -3,13 +3,18 @@ package test.lambda;
 import static lambda.LambdaCalculus.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Test;
 
+import lambda.Command;
 import lambda.Expression;
+import lambda.LambdaCalculus.ConsumerWriter;
+import lambda.LambdaCalculusException;
 
 class TestLambdaCalculus {
 
@@ -21,37 +26,37 @@ class TestLambdaCalculus {
         try {
             parse("λx y");
             fail();
-        } catch (RuntimeException e) {
+        } catch (LambdaCalculusException e) {
             assertEquals("variable expected", e.getMessage());
         }
         try {
             parse("λ.y");
             fail();
-        } catch (RuntimeException e) {
+        } catch (LambdaCalculusException e) {
             assertEquals("variable expected", e.getMessage());
         }
         try {
             parse("(y");
             fail();
-        } catch (RuntimeException e) {
+        } catch (LambdaCalculusException e) {
             assertEquals("')' expected", e.getMessage());
         }
         try {
             parse("y)");
             fail();
-        } catch (RuntimeException e) {
+        } catch (LambdaCalculusException e) {
             assertEquals("extra string ')'", e.getMessage());
         }
         try {
             parse("");
             fail();
-        } catch (RuntimeException e) {
+        } catch (LambdaCalculusException e) {
             assertEquals("unexpected end of string", e.getMessage());
         }
         try {
             parse(")");
             fail();
-        } catch (RuntimeException e) {
+        } catch (LambdaCalculusException e) {
             assertEquals("unexpected char ')'", e.getMessage());
         }
     }
@@ -333,5 +338,21 @@ class TestLambdaCalculus {
         }
     }
 
-
+    @Test
+    void testRepl() throws IOException {
+        logger.info("*** " + Common.methodName());
+        String source = ""
+        + "define 0 λf x.x\n"
+        + "define 1 λf x.f x\n"
+        + "define 2 λf x.f(f x)\n"
+        + "define 3 λf x.f(f(f x))\n"
+        + "define succ λn f x.f(n f x)\n"
+        + "succ 0\n"
+        + "succ 1\n"
+        + "succ 2\n"
+        ;
+        Map<String, Expression> context = new HashMap<>();
+        context.put("define", Command.DEFINE);
+        repl(new StringReader(source), new ConsumerWriter(logger::info), context, true, true);
+    }
 }

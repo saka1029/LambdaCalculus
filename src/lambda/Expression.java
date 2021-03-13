@@ -13,7 +13,7 @@ public abstract class Expression {
         return sb.toString();
     }
 
-    abstract Expression reduce( Bind<BoundVariable, Expression> bind, Map<String, Expression> context);
+    abstract Expression reduce(Bind<BoundVariable, Expression> bind, Map<String, Expression> context);
 
     public Expression reduce(Map<String, Expression> context) {
         return reduce(null, context);

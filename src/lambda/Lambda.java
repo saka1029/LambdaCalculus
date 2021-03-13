@@ -30,5 +30,4 @@ public class Lambda extends Expression {
         Expression newBody = body.reduce(Bind.bind(bind, variable, newVariable), context);
         return new Lambda(newVariable, newBody);
     }
-
 }
